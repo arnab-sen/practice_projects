@@ -310,7 +310,7 @@ def game_vs_ai(p1_icon, p2_icon, board, coordinates):
             display_board(board)
             coordinates = get_ai_coordinates(board)
             print("The computer is thinking...")
-            time.sleep(3)
+            time.sleep(2)
             change_board(board, coordinates[0], coordinates[1], p2_icon)
         else:
             clear_screen()
@@ -326,6 +326,7 @@ def main():
     p2_icon = "O"
     play_again = "y"
     while play_again == "y":
+        clear_screen()
         display_intro()
         choice = display_menu()
         play_again == "n"
