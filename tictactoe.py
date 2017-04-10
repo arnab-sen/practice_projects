@@ -237,7 +237,6 @@ def ai_pre_win(board):
             if matrix[i][j] == 2: count -= 1
             elif matrix[i][j] == 1: count += 1
         if count == 2:
-            print("Blocking row")
             for j in range(3):
                 if matrix[i][j] == 0: return [i, j]
 
@@ -248,7 +247,6 @@ def ai_pre_win(board):
             if matrix[j][i] == 2: count -= 1
             elif matrix[j][i] == 1: count += 1
         if count == 2:
-            print("Blocking column")
             for j in range(3):
                 if matrix[j][i] == 0: return [j, i]
 
@@ -259,7 +257,6 @@ def ai_pre_win(board):
         if matrix[i][i] == 2: count -= 1
         elif matrix[i][i] == 1: count += 1
     if count == 2:
-        print("Blocking forward diagonal")
         for i in range(3):
             if matrix[i][i] == 0: return [i, i]
 
@@ -269,10 +266,8 @@ def ai_pre_win(board):
         if matrix[2 - i][i] == 2: count -= 1
         elif matrix[2 - i][i] == 1: count += 1
     if count == 2:
-        print("Blocking anti-diagonal")
         for i in range(3):
             if matrix[2 - i][i] == 0: return [2 - i, i]
-    print("Not trying to block")
     return ["", ""]
     
 
