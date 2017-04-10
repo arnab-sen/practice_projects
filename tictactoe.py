@@ -184,7 +184,7 @@ def game_vs_p2(p1_icon, p2_icon, board, coordinates):
             return
 
 def ai_pre_win(board):
-    # Completing potential AI triplet given first
+    # Completing potential AI triplet given first priority
     # Blocking potential player 1 triplet given secondary priority
     matrix = board_to_matrix(board)
     
