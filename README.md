@@ -1,1 +1,0 @@
-This is a backup for personal projects
