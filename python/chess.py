@@ -91,7 +91,7 @@ def display_board(board_):
     # This version has the new unicode versions
     # of the pieces (e.g. white pawn = ♙)
     board = copy.deepcopy(board_)
-    board[0] = [" ___"] * 8
+    board[0] = ["____"] * 7 + ["___"]
     for i in range(1, 9):
         for j in range(8):
             if board[i][j].find("b") == -1 and \
@@ -108,11 +108,11 @@ def display_board(board_):
     for i in range(8): print(board[0][i], end = "")
     print()
     for i in range(1, 9):
-        print(9 - i, " ", end = "")
+        print(9 - i, "", end = "")
         for j in range(8):
             print(board[i][j], end = "")
         print()
-    print("     a   b   c   d   e   f   g   h")
+    print("    a   b   c   d   e   f   g   h")
     print()
 
 def get_move(board):
@@ -128,7 +128,7 @@ def get_move(board):
     position[2] = 9 - int(move[2][1])
     position[3] = letters.find(move[2][0])
     while not(move_is_valid(board, position)):
-        print("Invalid move.")
+        print("Invalid move")
         move = input("Enter move (-1 to exit): ")
         move = move.split()
         if move[0] == "-1": return [-1]
@@ -157,46 +157,39 @@ def remove_overlap(board, move):
     # (so long as the move was valid)
     pass
 
-def move_is_valid(board, move):
-    # Invalid when:
-    # - Out of bounds
-    # - No piece chosen
-    # - Piece movement doesn't match
-    #   piece movement pattern (e.g.
-    #   a bishop moving straight up is
-    #   invalid)
-    # - The pattern is obstructed by
-    #   another piece (exceptions:
-    #   knight, king + castle swap
-    #   (castling))
-    # - The destination contains a
-    #   piece from the same team
-    
-    b = board
-    m = move
-    piece = b[m[0]][m[1]]
-    pos_i = m[0:2]
-    pos_f = m[2:4]
+def get_forward_movement(piece, move):
     # Forward movement of a white piece is
     # the reverse of a black piece, but
     # horizontal movement is the same
     # i.e. forward: b 1 -> 8/ w 8 -> 1,
     #      horizontal: b 0 -> 7/ w 0 -> 7
-
-    if out_of_bounds(m): return False
-    if piece == "_": return False
-
     # right_movement > 0 means pos_f is to
     # the right of pos_i, and
     # right_movement < 0 means pos_f is to
     # the left of pos_i
+    pos_i = move[0:2]
+    pos_f = move[2:4]
+    forward_movement = 0
     if piece[1] == "w":
         forward_movement = pos_i[0] - pos_f[0]
-        right_movement = pos_f[1] - pos_i[1]
     elif piece[1] == "b":
         forward_movement = pos_f[0] - pos_i[0]
-        right_movement = pos_f[1] - pos_i[1]
+    return forward_movement
 
+def get_right_movement(piece, move):
+    pos_i = move[0:2]
+    pos_f = move[2:4]
+    right_movement = 0
+    if piece[1] == "w" or piece[1] == "b":
+        right_movement = pos_f[1] - pos_i[1]
+    return right_movement
+
+def valid_movement_pattern(piece, move):
+    pos_i = move[0:2]
+    pos_f = move[2:4]
+    forward_movement = get_forward_movement(piece, move)
+    right_movement= get_right_movement(piece, move)
+    
     # - Check piece patterns in the order:
     #   pawn, rook, knight, bishop, queen, king
     # - Remember that moving forward is 1 -> 8
@@ -220,13 +213,13 @@ def move_is_valid(board, move):
                 
     elif piece[0] == "R":
         # Invalid if it moves diagonally
-        if pos_f[1] != pos_i[1]: return False
+        if abs(forward_movement) != 0 and\
+           abs(right_movement) != 0: return False
 
     elif piece[0] == "K":
-        # Can only move in an L shape variant, e.g.
-        # up 2 right 1,
+        # Can only move in an L shape variant,
         # i.e. vertically 2, horizontally 1 or
-        # vertically 1, horizontally 2
+        #      vertically 1, horizontally 2
         if not(abs(forward_movement) == 2 and\
             abs(right_movement) == 1) and\
             not(abs(forward_movement == 1) and\
@@ -252,9 +245,120 @@ def move_is_valid(board, move):
         # movement can exceed one square
         if abs(forward_movement) > 1 or abs(right_movement) > 1:
             return False
-    
 
     return True
+
+def move_is_valid(board, move):
+    b = board
+    m = move
+    piece = b[m[0]][m[1]]
+    
+    # Invalid when:
+    # - Out of bounds
+    if out_of_bounds(m):
+        print("Out of bounds")
+        return False
+    
+    # - No piece chosen
+    if piece == "_":
+        print("No piece chosen")
+        return False
+    
+    # - Piece movement doesn't match
+    #   piece movement pattern (e.g.
+    #   a rook moving diagonally is
+    #   invalid)
+    if not(valid_movement_pattern(piece, m)):
+        print("Invalid movement pattern")
+        return False
+    
+    # - The pattern is obstructed by
+    #   another piece (exceptions:
+    #   knight, king + castle swap
+    #   (castling))
+    if path_obstructed(b, m):
+        print("Path obstructed")
+        return False
+    
+    # - The destination contains a
+    #   piece from the same team
+
+    return True
+
+def path_obstructed(board, move):
+    # - This returns True if there is a piece
+    #   in the path of the piece's movement;
+    #   this excludes the destination and
+    #   the movement of knights
+    # - This assumes that the movement pattern
+    #   of the piece is valid (which should be
+    #   checked prior to this call in
+    #   move_is_valid())
+    b = board
+    m = move
+    piece = b[m[0]][m[1]]
+    forward_movement = get_forward_movement(piece, move)
+    right_movement = get_right_movement(piece, move)
+    
+    if piece[0] == "P":
+        if abs(forward_movement) == 2:
+            if piece[1] == "w":
+                if b[m[2] + 1][m[3]] != "_": return True
+            elif piece[1] == "b":
+                if b[m[2] - 1][m[3]] != "_": return True
+                
+    if piece[0] == "R":
+        if forward_movement != 0:
+            if piece[1] == "w":
+                for i in range(1, abs(forward_movement) + 1):
+                    if b[8 - i][m[3]] != "_": return True
+            elif piece[1] == "b":
+                for i in range(m[0] + 1, m[0] + abs(forward_movement)):
+                    if b[i][m[3]] != "_": return True
+        elif right_movement != 0:
+            if right_movement > 0:
+                for i in range(m[1] + 1, m[1] + right_movement):
+                    if b[m[2]][i] != "_": return True
+            if right_movement < 0:
+                for i in range(abs(right_movement)):
+                    if b[m[2]][7 - i] != "_": return True
+    if piece[0] == "B":
+        # Use m[0 or 1] + 1 as the starting check position
+        # so that it doesn't check itself and see an
+        # obstruction
+        
+        # Moving up and right
+        if piece[1] == "w":
+            i = 8 - m[0] + 1
+            j = m[1] + 1    
+            if forward_movement > 0 and right_movement > 0:
+                while j < m[3]:
+                    if b[8 - i][j] != "_":
+                        print(m, forward_movement, right_movement, i, j)
+                        return True
+                    i += 1
+                    j += 1
+        elif piece[1] == "b":
+            i = m[0] - 1
+            j = m[1] + 1    
+            if piece[1] == "w":
+                if forward_movement < 0 and right_movement > 0:
+                    while j < m[3]:
+                        if b[i][j] != "_":
+                            print(m, forward_movement, right_movement, i, j)
+                            return True
+                        i += 1
+                        j += 1
+                    
+        # Moving up and left
+        
+
+        # Moving down and right
+
+        # Moving down and left
+        
+   
+    return False
 
 def out_of_bounds(move):
     if move[0] < 1 or move[0] > 8: return True
@@ -279,7 +383,7 @@ def main():
     board = initialise_board()
     moves_left = 5
     for i in range(5):
-        #clear_screen()      
+        clear_screen()      
         display_board(board)
         print("Moves left:", moves_left)
         move = get_move(board)
