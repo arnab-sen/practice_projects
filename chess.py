@@ -75,7 +75,7 @@ def get_move():
     return position
 
 def move_piece(board, move):
-    board[5][0] = board[move[0]][move[1]]
+    board[move[2]][move[3]] = board[move[0]][move[1]]
     board[move[0]][move[1]] = "_"
     return board
 
