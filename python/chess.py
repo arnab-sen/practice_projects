@@ -439,7 +439,8 @@ def overlap_with_team(board, move):
     piece = b[m[0]][m[1]]
     destination = b[m[2]][m[3]]
     if destination == "_": return False
-    if piece[1] == destination[1]: return True 
+    if piece[1] == destination[1]: return True
+    else: return False
 
 def overlap_with_enemy(board, move):
     b = board
@@ -447,12 +448,8 @@ def overlap_with_enemy(board, move):
     piece = b[m[0]][m[1]]
     destination = b[m[2]][m[3]]
     if destination == "_": return False
-    if piece[1] == "w":
-        if destination[1] == "b": return True
-        else: return False
-    if piece[1] == "b":
-        if destination[1] == "w": return True
-        else: return False
+    if piece[1] != destination[1]: return True
+    else: return False
 
 def out_of_bounds(move):
     if move[0] < 1 or move[0] > 8: return True
