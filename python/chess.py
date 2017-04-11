@@ -430,8 +430,7 @@ def path_obstructed(board, move):
                 for i in range(1, abs(forward_movement)):
                     #print("Moving down and left")
                     if b[m[0] + i][m[1] - i] != "_": return True
-            
-   
+                    
     return False
 
 def overlap_with_team(board, move):
