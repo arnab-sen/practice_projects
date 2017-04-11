@@ -184,7 +184,7 @@ def get_right_movement(piece, move):
         right_movement = pos_f[1] - pos_i[1]
     return right_movement
 
-def valid_movement_pattern(piece, move):
+def valid_movement_pattern(board, piece, move):
     pos_i = move[0:2]
     pos_f = move[2:4]
     forward_movement = get_forward_movement(piece, move)
@@ -195,10 +195,11 @@ def valid_movement_pattern(piece, move):
     # - Remember that moving forward is 1 -> 8
     #   for black pieces and 8 -> 1 for white
     #   pieces
-    if piece[0] == "P":
+    if piece[0] == "P":      
         if pos_f[1] != pos_i[1]:
             # Diagonal movement only allowed
             # if taking an opponent's piece
+            if not(overlap_with_enemy(board, move)): return False
             if forward_movement == 0: return False
             if forward_movement == 1 and abs(right_movement) > 1: return False
             if forward_movement == -1 and abs(right_movement) > 0: return False
@@ -267,7 +268,7 @@ def move_is_valid(board, move):
     #   piece movement pattern (e.g.
     #   a rook moving diagonally is
     #   invalid)
-    if not(valid_movement_pattern(piece, m)):
+    if not(valid_movement_pattern(b, piece, m)):
         print("Invalid movement pattern")
         return False
     
@@ -281,6 +282,9 @@ def move_is_valid(board, move):
     
     # - The destination contains a
     #   piece from the same team
+    if overlap_with_team(b, m):
+        print("One of your pieces is already in that position")
+        return False
 
     return True
 
@@ -296,10 +300,13 @@ def path_obstructed(board, move):
     b = board
     m = move
     piece = b[m[0]][m[1]]
+    destination = b[m[2]][m[3]]
     forward_movement = get_forward_movement(piece, move)
     right_movement = get_right_movement(piece, move)
     
     if piece[0] == "P":
+        if right_movement == 0:
+            if destination != "_": return True
         if abs(forward_movement) == 2:
             if piece[1] == "w":
                 if b[m[2] + 1][m[3]] != "_": return True
@@ -426,6 +433,27 @@ def path_obstructed(board, move):
    
     return False
 
+def overlap_with_team(board, move):
+    b = board
+    m = move
+    piece = b[m[0]][m[1]]
+    destination = b[m[2]][m[3]]
+    if destination == "_": return False
+    if piece[1] == destination[1]: return True 
+
+def overlap_with_enemy(board, move):
+    b = board
+    m = move
+    piece = b[m[0]][m[1]]
+    destination = b[m[2]][m[3]]
+    if destination == "_": return False
+    if piece[1] == "w":
+        if destination[1] == "b": return True
+        else: return False
+    if piece[1] == "b":
+        if destination[1] == "w": return True
+        else: return False
+
 def out_of_bounds(move):
     if move[0] < 1 or move[0] > 8: return True
     if move[1] < 0 or move[1] > 7: return True
@@ -448,7 +476,7 @@ def main():
 
     board = initialise_board()
     moves_left = 20
-    for i in range(5):
+    for i in range(moves_left):
         clear_screen()      
         display_board(board)
         print("Moves left:", moves_left)
