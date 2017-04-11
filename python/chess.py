@@ -27,7 +27,9 @@ def initialise_board():
 
     return board
 
-def display_board(board_):
+def display_board_old(board_):
+    # This version has the original notation for
+    # the pieces (e.g. white pawn = Pw)
     board = copy.deepcopy(board_)
     board[0] = [" ____"] * 8
     for i in range(1, 9):
@@ -58,6 +60,59 @@ def display_board(board_):
             print(board[i][j], end = "")
         print()
     print("      a    b    c    d    e    f    g    h")
+    print()
+
+def get_piece_image(piece):
+    # Return a fancy unicode version of
+    # a piece
+    # e.g. "Kb" --> "♞" (black knight)
+    new_piece = "!"
+    if piece[0] == "P":
+        if piece[1] == "w": return "♙"
+        elif piece[1] == "b": return "♟"
+    if piece[0] == "R":
+        if piece[1] == "w": return "♖"
+        elif piece[1] == "b": return "♜"
+    if piece[0] == "K":
+        if piece[1] == "w": return "♘"
+        elif piece[1] == "b": return "♞"
+    if piece[0] == "B":
+        if piece[1] == "w": return "♗"
+        elif piece[1] == "b": return "♝"
+    if piece[0] == "Q":
+        if piece[1] == "w": return "♕"
+        elif piece[1] == "b": return "♛"
+    if piece[0] == "+":
+        if piece[1] == "w": return "♔"
+        elif piece[1] == "b": return "♚"
+    return new_piece
+
+def display_board(board_):
+    # This version has the new unicode versions
+    # of the pieces (e.g. white pawn = ♙)
+    board = copy.deepcopy(board_)
+    board[0] = [" ___"] * 8
+    for i in range(1, 9):
+        for j in range(8):
+            if board[i][j].find("b") == -1 and \
+               board[i][j].find("w") == -1:
+                board[i][j] = "|___"
+            else:
+                s = get_piece_image(board[i][j])
+                if j <= 2: board[i][j] = "|_" + s
+                elif j >= 5: board[i][j] = "|" + s + "_"
+                else: board[i][j] = "|_" + s + "_"
+        board[i][7] += "|"
+
+    print("   ", end = "")
+    for i in range(8): print(board[0][i], end = "")
+    print()
+    for i in range(1, 9):
+        print(9 - i, " ", end = "")
+        for j in range(8):
+            print(board[i][j], end = "")
+        print()
+    print("     a   b   c   d   e   f   g   h")
     print()
 
 def get_move(board):
@@ -224,7 +279,7 @@ def main():
     board = initialise_board()
     moves_left = 5
     for i in range(5):
-        clear_screen()      
+        #clear_screen()      
         display_board(board)
         print("Moves left:", moves_left)
         move = get_move(board)
