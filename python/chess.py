@@ -328,6 +328,7 @@ def path_obstructed(board, move):
             if right_movement < 0:
                 for i in range(abs(right_movement)):
                     if b[m[2]][7 - i] != "_": return True
+                    
     if piece[0] == "B":
         # Use m[0 or 1] + 1 as the starting check position
         # so that it doesn't check itself and see an
