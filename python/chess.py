@@ -116,6 +116,7 @@ def move_is_valid(board, move):
     #   (castling))
     # - The destination contains a
     #   piece from the same team
+    
     b = board
     m = move
     piece = b[m[0]][m[1]]
@@ -166,7 +167,15 @@ def move_is_valid(board, move):
         # Invalid if it moves diagonally
         if pos_f[1] != pos_i[1]: return False
 
-    elif piece[0] == "K": pass
+    elif piece[0] == "K":
+        # Can only move in an L shape variant, e.g.
+        # up 2 right 1,
+        # i.e. vertically 2, horizontally 1 or
+        # vertically 1, horizontally 2
+        if not(abs(forward_movement) == 2 and\
+            abs(right_movement) == 1) and\
+            not(abs(forward_movement == 1) and\
+             abs(right_movement == 2)): return False
 
     elif piece[0] == "B":
         # Invalid if it moves vertically
@@ -182,7 +191,12 @@ def move_is_valid(board, move):
             if abs(forward_movement) != abs(right_movement):
                 return False
 
-    elif piece[0] == "+": pass
+    elif piece[0] == "+":
+        # Moves exactly like a queen except
+        # neither its vertical nor horizontal
+        # movement can exceed one square
+        if abs(forward_movement) > 1 or abs(right_movement) > 1:
+            return False
     
 
     return True
