@@ -158,31 +158,22 @@ def remove_overlap(board, move):
     pass
 
 def get_forward_movement(piece, move):
-    # Forward movement of a white piece is
-    # the reverse of a black piece, but
-    # horizontal movement is the same
-    # i.e. forward: b 1 -> 8/ w 8 -> 1,
-    #      horizontal: b 0 -> 7/ w 0 -> 7
+    # forward_movement > 0 means pos_f is
+    # above pos_i, and
+    # forward_movement < 1 means pos_f is
+    # below pos_i
     # right_movement > 0 means pos_f is to
     # the right of pos_i, and
     # right_movement < 0 means pos_f is to
     # the left of pos_i
     pos_i = move[0:2]
     pos_f = move[2:4]
-    forward_movement = 0
-    if piece[1] == "w":
-        forward_movement = pos_i[0] - pos_f[0]
-    elif piece[1] == "b":
-        forward_movement = pos_f[0] - pos_i[0]
-    return forward_movement
+    return pos_i[0] - pos_f[0]
 
 def get_right_movement(piece, move):
     pos_i = move[0:2]
     pos_f = move[2:4]
-    right_movement = 0
-    if piece[1] == "w" or piece[1] == "b":
-        right_movement = pos_f[1] - pos_i[1]
-    return right_movement
+    return pos_f[1] - pos_i[1]
 
 def valid_movement_pattern(piece, move):
     pos_i = move[0:2]
@@ -192,22 +183,22 @@ def valid_movement_pattern(piece, move):
     
     # - Check piece patterns in the order:
     #   pawn, rook, knight, bishop, queen, king
-    # - Remember that moving forward is 1 -> 8
-    #   for black pieces and 8 -> 1 for white
-    #   pieces
     if piece[0] == "P":
         if pos_f[1] != pos_i[1]:
             # Diagonal movement only allowed
             # if taking an opponent's piece
-            if not((pos_f[1] == pos_i[1] + 1 or\
-                   pos_f[1] == pos_i[1] - 1) and\
-                   forward_movement == 1):
-                return False           
+            if forward_movement == 0: return False
+            if piece[1] == "w":
+                if forward_movement == 1 and abs(right_movement) > 1: return False
+                if forward_movement == -1 and abs(right_movement) > 0: return False
+            if piece[1] == "b":
+                if forward_movement == -1 and abs(right_movement) > 1: return False
+                if forward_movement == 1 and abs(right_movement) > 0: return False
         if forward_movement > 2: return False
         if forward_movement < -1: return False
         # - Two steps forward is only valid if the
         #   pawn is currently in its initial position
-        if forward_movement == 2:            
+        if abs(forward_movement) == 2:            
             if piece[1] == "w" and pos_i[0] != 7: return False
             if piece[1] == "b" and pos_i[0] != 2: return False
                 
