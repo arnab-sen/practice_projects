@@ -158,22 +158,31 @@ def remove_overlap(board, move):
     pass
 
 def get_forward_movement(piece, move):
-    # forward_movement > 0 means pos_f is
-    # above pos_i, and
-    # forward_movement < 1 means pos_f is
-    # below pos_i
+    # Forward movement of a white piece is
+    # the reverse of a black piece, but
+    # horizontal movement is the same
+    # i.e. forward: b 1 -> 8/ w 8 -> 1,
+    #      horizontal: b 0 -> 7/ w 0 -> 7
     # right_movement > 0 means pos_f is to
     # the right of pos_i, and
     # right_movement < 0 means pos_f is to
     # the left of pos_i
     pos_i = move[0:2]
     pos_f = move[2:4]
-    return pos_i[0] - pos_f[0]
+    forward_movement = 0
+    if piece[1] == "w":
+        forward_movement = pos_i[0] - pos_f[0]
+    elif piece[1] == "b":
+        forward_movement = pos_f[0] - pos_i[0]
+    return forward_movement
 
 def get_right_movement(piece, move):
     pos_i = move[0:2]
     pos_f = move[2:4]
-    return pos_f[1] - pos_i[1]
+    right_movement = 0
+    if piece[1] == "w" or piece[1] == "b":
+        right_movement = pos_f[1] - pos_i[1]
+    return right_movement
 
 def valid_movement_pattern(piece, move):
     pos_i = move[0:2]
@@ -183,22 +192,21 @@ def valid_movement_pattern(piece, move):
     
     # - Check piece patterns in the order:
     #   pawn, rook, knight, bishop, queen, king
+    # - Remember that moving forward is 1 -> 8
+    #   for black pieces and 8 -> 1 for white
+    #   pieces
     if piece[0] == "P":
         if pos_f[1] != pos_i[1]:
             # Diagonal movement only allowed
             # if taking an opponent's piece
             if forward_movement == 0: return False
-            if piece[1] == "w":
-                if forward_movement == 1 and abs(right_movement) > 1: return False
-                if forward_movement == -1 and abs(right_movement) > 0: return False
-            if piece[1] == "b":
-                if forward_movement == -1 and abs(right_movement) > 1: return False
-                if forward_movement == 1 and abs(right_movement) > 0: return False
+            if forward_movement == 1 and abs(right_movement) > 1: return False
+            if forward_movement == -1 and abs(right_movement) > 0: return False
         if forward_movement > 2: return False
         if forward_movement < -1: return False
         # - Two steps forward is only valid if the
         #   pawn is currently in its initial position
-        if abs(forward_movement) == 2:            
+        if forward_movement == 2:            
             if piece[1] == "w" and pos_i[0] != 7: return False
             if piece[1] == "b" and pos_i[0] != 2: return False
                 
@@ -317,37 +325,104 @@ def path_obstructed(board, move):
         # Use m[0 or 1] + 1 as the starting check position
         # so that it doesn't check itself and see an
         # obstruction
+
+        # Moving right: right_check > 0
+        # Moving left: right_check < 0
         
         # Moving up and right
-        if piece[1] == "w":
-            i = 8 - m[0] + 1
-            j = m[1] + 1    
-            if forward_movement > 0 and right_movement > 0:
-                while j < m[3]:
-                    if b[8 - i][j] != "_":
-                        print(m, forward_movement, right_movement, i, j)
-                        return True
-                    i += 1
-                    j += 1
-        elif piece[1] == "b":
-            i = m[0] - 1
-            j = m[1] + 1    
-            if piece[1] == "w":
-                if forward_movement < 0 and right_movement > 0:
-                    while j < m[3]:
-                        if b[i][j] != "_":
-                            print(m, forward_movement, right_movement, i, j)
-                            return True
-                        i += 1
-                        j += 1
+        if piece[1] == "w": forward_check = forward_movement > 0
+        if piece[1] == "b": forward_check = forward_movement < 0
+        right_check = right_movement > 0
+        if forward_check and right_check:
+            for i in range(1, abs(forward_movement)):
+                #print("Moving up and right")
+                if b[m[0] - i][m[1] + i] != "_": return True
                     
         # Moving up and left
-        
+        if piece[1] == "w": forward_check = forward_movement > 0
+        if piece[1] == "b": forward_check = forward_movement < 0
+        right_check = right_movement < 0
+        if forward_check and right_check:
+            for i in range(1, abs(forward_movement)):
+                #print("Moving up and left")
+                if b[m[0] - i][m[1] - i] != "_": return True
 
         # Moving down and right
-
-        # Moving down and left
+        if piece[1] == "w": downward_check = forward_movement < 0
+        if piece[1] == "b": downward_check = forward_movement > 0
+        right_check = right_movement > 0
+        if downward_check and right_check:
+            for i in range(1, abs(forward_movement)):
+                #print("Moving down and right")
+                if b[m[0] + i][m[1] + i] != "_": return True
         
+        # Moving down and left
+        if piece[1] == "w": downward_check = forward_movement < 0
+        if piece[1] == "b": downward_check = forward_movement > 0
+        right_check = right_movement < 0
+        if downward_check and right_check:
+            for i in range(1, abs(forward_movement)):
+                #print("Moving down and left")
+                if b[m[0] + i][m[1] - i] != "_": return True
+
+    if piece[0] == "Q":
+        # Behaves as a rook if there is no horizontal
+        # movement, and as a bishop otherwise
+        
+        if abs(right_movement) == 0:
+            # Rook
+            if forward_movement != 0:
+                if piece[1] == "w":
+                    for i in range(1, abs(forward_movement) + 1):
+                        if b[8 - i][m[3]] != "_": return True
+                elif piece[1] == "b":
+                    for i in range(m[0] + 1, m[0] + abs(forward_movement)):
+                        if b[i][m[3]] != "_": return True
+            elif right_movement != 0:
+                if right_movement > 0:
+                    for i in range(m[1] + 1, m[1] + right_movement):
+                        if b[m[2]][i] != "_": return True
+                if right_movement < 0:
+                    for i in range(abs(right_movement)):
+                        if b[m[2]][7 - i] != "_": return True
+        else:
+            # Bishop
+            # Moving up and right
+            if piece[1] == "w": forward_check = forward_movement > 0
+            if piece[1] == "b": forward_check = forward_movement < 0
+            right_check = right_movement > 0
+            if forward_check and right_check:
+                for i in range(1, abs(forward_movement)):
+                    #print("Moving up and right")
+                    if b[m[0] - i][m[1] + i] != "_": return True
+                        
+            # Moving up and left
+            if piece[1] == "w": forward_check = forward_movement > 0
+            if piece[1] == "b": forward_check = forward_movement < 0
+            right_check = right_movement < 0
+            if forward_check and right_check:
+                for i in range(1, abs(forward_movement)):
+                    #print("Moving up and left")
+                    if b[m[0] - i][m[1] - i] != "_": return True
+
+            # Moving down and right
+            if piece[1] == "w": downward_check = forward_movement < 0
+            if piece[1] == "b": downward_check = forward_movement > 0
+            right_check = right_movement > 0
+            if downward_check and right_check:
+                for i in range(1, abs(forward_movement)):
+                    #print("Moving down and right")
+                    if b[m[0] + i][m[1] + i] != "_": return True
+            
+            # Moving down and left
+            if piece[1] == "w": downward_check = forward_movement < 0
+            if piece[1] == "b": downward_check = forward_movement > 0
+            right_check = right_movement < 0
+            if downward_check and right_check:
+                for i in range(1, abs(forward_movement)):
+                    #print("Moving down and left")
+                    if b[m[0] + i][m[1] - i] != "_": return True
+            
    
     return False
 
@@ -372,7 +447,7 @@ def main():
     #   comparing coordinates
 
     board = initialise_board()
-    moves_left = 5
+    moves_left = 20
     for i in range(5):
         clear_screen()      
         display_board(board)
