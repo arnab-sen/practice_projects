@@ -232,14 +232,13 @@ def valid_movement_pattern(board, piece, move):
                 
     elif piece[0] == "R":
         # Invalid if it moves diagonally
-        if abs(forward_movement) != 0 and\
-           abs(right_movement) != 0: return False
+        if forward_movement * right_movement != 0: return False        
 
     elif piece[0] == "K":
         # Can only move in an L shape variant,
         # i.e. vertically 2, horizontally 1 or
         #      vertically 1, horizontally 2
-        if not(abs(forward_movement) * abs(right_movement)) == 2:
+        if not(abs(forward_movement) * abs(right_movement) == 2):
             return False
 
     elif piece[0] == "B":
@@ -252,7 +251,7 @@ def valid_movement_pattern(board, piece, move):
     elif piece[0] == "Q":
         # The queen can either move like a rook
         # or like a bishop, but not both
-        if forward_movement != 0 and right_movement != 0:
+        if forward_movement * right_movement != 0:
             if abs(forward_movement) != abs(right_movement):
                 return False
 
@@ -534,6 +533,7 @@ def play_vs_cpu(board):
             print(game_over)
             break
         if player == 2:
+            print("Turn", turn)
             print("The computer is thinking...")
             time.sleep(2)               
         print("Player " + str(player) + "'s turn")
@@ -583,7 +583,7 @@ def main():
     #   with helper functions,
     #   e.g. is_diagonal_to() instead of
     #   comparing coordinates
-
+    clear_screen()
     board = initialise_board()
     choice = display_menu()
     if choice == "1": play_vs_cpu(board)
