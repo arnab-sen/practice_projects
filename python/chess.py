@@ -272,18 +272,18 @@ def move_is_valid(board, move):
         print("Invalid movement pattern")
         return False
     
+    # - The destination contains a
+    #   piece from the same team
+    if overlap_with_team(b, m):
+        print("One of your pieces is already in that position")
+        return False
+
     # - The pattern is obstructed by
     #   another piece (exceptions:
     #   knight, king + castle swap
     #   (castling))
     if path_obstructed(b, m):
         print("Path obstructed")
-        return False
-    
-    # - The destination contains a
-    #   piece from the same team
-    if overlap_with_team(b, m):
-        print("One of your pieces is already in that position")
         return False
 
     return True
