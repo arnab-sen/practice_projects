@@ -1,5 +1,6 @@
 import copy
 import random
+import time
 
 def initialise_board():
     # Initialise the 8x8 board matrix
@@ -526,13 +527,15 @@ def play_vs_cpu(board):
         if turn % 2 == 1: player = 1
         elif turn % 2 == 0: player = 2
         else: break
-        if player == 1:
-            clear_screen()      
-            display_board(board)
-            game_over = check_game_state(board)
+        clear_screen()      
+        display_board(board)
+        game_over = check_game_state(board)
         if game_over != "":
             print(game_over)
             break
+        if player == 2:
+            print("The computer is thinking...")
+            time.sleep(2)               
         print("Player " + str(player) + "'s turn")
         print("Turn", turn)
         if player == 1:
@@ -585,7 +588,7 @@ def main():
     choice = display_menu()
     if choice == "1": play_vs_cpu(board)
     elif choice == "2": play_vs_player_2(board)
-    elif choice == "Q": play_debug(board)
+    elif choice == "debug": play_debug(board)
     print("Exiting...")
         
 main()
@@ -596,4 +599,7 @@ ISSUES:
    even though nothing is in its way;
    there is a pawn to its right and
    a pawn below it
+ - Queen could not remove enemy pawn
+   (pawn stayed in place and queen was
+   instead removed)
 """
