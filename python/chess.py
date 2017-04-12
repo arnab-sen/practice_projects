@@ -1,4 +1,5 @@
 import copy
+import random
 
 def initialise_board():
     # Initialise the 8x8 board matrix
@@ -115,7 +116,24 @@ def display_board(board_):
     print("    a   b   c   d   e   f   g   h")
     print()
 
-def get_move(board):
+def get_cpu_move(board, player):
+    cpu = True
+    position = ["", "", "", ""]
+    position[0] = random.randrange(1, 9)
+    position[1] = random.randrange(8)
+    position[2] = random.randrange(1, 9)
+    position[3] = random.randrange(8)
+    
+    while not(move_is_valid(board, position, player, cpu)):
+        position[0] = random.randrange(1, 9)
+        position[1] = random.randrange(8)
+        position[2] = random.randrange(1, 9)
+        position[3] = random.randrange(8)
+        
+    #print(position)
+    return position
+
+def get_move(board, player):
     print("Move example: a2 to a4")
     letters = "abcdefgh"
     move = input("Enter move (-1 to exit): ")
@@ -127,7 +145,7 @@ def get_move(board):
     position[1] = letters.find(move[0][0])
     position[2] = 9 - int(move[2][1])
     position[3] = letters.find(move[2][0])
-    while not(move_is_valid(board, position)):
+    while not(move_is_valid(board, position, player, False)):
         print("Invalid move")
         move = input("Enter move (-1 to exit): ")
         move = move.split()
@@ -139,7 +157,7 @@ def get_move(board):
         position[2] = 9 - int(move[2][1])
         position[3] = letters.find(move[2][0])
         
-    print(position)
+    #print(position)
     return position
 
 def move_piece(board, move):
@@ -220,10 +238,8 @@ def valid_movement_pattern(board, piece, move):
         # Can only move in an L shape variant,
         # i.e. vertically 2, horizontally 1 or
         #      vertically 1, horizontally 2
-        if not(abs(forward_movement) == 2 and\
-            abs(right_movement) == 1) and\
-            not(abs(forward_movement == 1) and\
-             abs(right_movement == 2)): return False
+        if not(abs(forward_movement) * abs(right_movement)) == 2:
+            return False
 
     elif piece[0] == "B":
         # Invalid if it moves vertically
@@ -248,7 +264,19 @@ def valid_movement_pattern(board, piece, move):
 
     return True
 
-def move_is_valid(board, move):
+def moving_opponent_piece(board, move, player):
+    b = board
+    m = move
+    piece = b[m[0]][m[1]]
+    
+    if player == 1:
+        if piece[1] == "b": return True
+    if player == 2:
+        if piece[1] == "w": return True
+
+    return False
+
+def move_is_valid(board, move, player, cpu):
     b = board
     m = move
     piece = b[m[0]][m[1]]
@@ -256,12 +284,18 @@ def move_is_valid(board, move):
     # Invalid when:
     # - Out of bounds
     if out_of_bounds(m):
-        print("Out of bounds")
+        if not(cpu): print("Out of bounds")
         return False
     
     # - No piece chosen
     if piece == "_":
-        print("No piece chosen")
+        if not(cpu): print("No piece chosen")
+        return False
+
+    # - Player is trying to move
+    #   the opponent's piece
+    if moving_opponent_piece(board, move, player):
+        if not(cpu): print("You cannot move an opponent's piece!")
         return False
     
     # - Piece movement doesn't match
@@ -269,13 +303,13 @@ def move_is_valid(board, move):
     #   a rook moving diagonally is
     #   invalid)
     if not(valid_movement_pattern(b, piece, m)):
-        print("Invalid movement pattern")
+        if not(cpu): print("Invalid movement pattern")
         return False
     
     # - The destination contains a
     #   piece from the same team
     if overlap_with_team(b, m):
-        print("One of your pieces is already in that position")
+        if not(cpu): print("One of your pieces is already in that position")
         return False
 
     # - The pattern is obstructed by
@@ -283,7 +317,7 @@ def move_is_valid(board, move):
     #   knight, king + castle swap
     #   (castling))
     if path_obstructed(b, m):
-        print("Path obstructed")
+        if not(cpu): print("Path obstructed")
         return False
 
     return True
@@ -463,6 +497,83 @@ def clear_screen():
 def get_removed_pieces(board, move):
     pass
 
+def check_game_state(board):
+    # Check if either king is not in play,
+    # in which case the player with a king
+    # in play wins
+    white_wins = False
+    black_wins = False
+    for i in range(len(board)):
+        for piece in board[i]:
+            if piece == "+w": white_wins = True
+            if piece == "+b": black_wins = True
+
+    if white_wins and not(black_wins): return "Player 1 wins!"
+    elif black_wins and not(white_wins): return "Player 2 wins!"
+    else: return ""
+
+def display_menu():
+    print("Welcome to chess!")
+    print("1. Player 1 vs Player 2 (CPU)")
+    print("2. Player 1 vs Player 2 (Human)")
+    print("3. Exit")
+    choice = input("Enter your choice: ")
+    return choice
+
+def play_vs_cpu(board):
+    turn = 1
+    while(1):
+        if turn % 2 == 1: player = 1
+        elif turn % 2 == 0: player = 2
+        else: break
+        if player == 1:
+            clear_screen()      
+            display_board(board)
+            game_over = check_game_state(board)
+        if game_over != "":
+            print(game_over)
+            break
+        print("Player " + str(player) + "'s turn")
+        print("Turn", turn)
+        if player == 1:
+            move = get_move(board, player)
+        else: move = get_cpu_move(board, player)
+        if move[0] == -1: break
+        board = move_piece(board, move)
+        turn += 1
+
+def play_vs_player_2(board):
+    turn = 1
+    while(1):
+        if turn % 2 == 1: player = 1
+        elif turn % 2 == 0: player = 2
+        else: break
+        clear_screen()      
+        display_board(board)
+        game_over = check_game_state(board)
+        if game_over != "":
+            print(game_over)
+            break
+        print("Player " + str(player) + "'s turn")
+        print("Turn", turn)
+        move = get_move(board, player)
+        if move[0] == -1: break
+        board = move_piece(board, move)
+        turn += 1
+
+def play_debug(board):
+    while(1):
+        player = 1
+        clear_screen()      
+        display_board(board)
+        game_over = check_game_state(board)
+        if game_over != "":
+            print(game_over)
+            break
+        move = get_move(board, player)
+        if move[0] == -1: break
+        board = move_piece(board, move)
+
 def main():
     # TODO:
     # - Tidy up positional comparisons
@@ -471,15 +582,18 @@ def main():
     #   comparing coordinates
 
     board = initialise_board()
-    moves_left = 20
-    for i in range(moves_left):
-        clear_screen()      
-        display_board(board)
-        print("Moves left:", moves_left)
-        move = get_move(board)
-        if move[0] == -1: break
-        board = move_piece(board, move)
-        moves_left -= 1
+    choice = display_menu()
+    if choice == "1": play_vs_cpu(board)
+    elif choice == "2": play_vs_player_2(board)
+    elif choice == "Q": play_debug(board)
+    print("Exiting...")
         
 main()
- 
+
+"""
+ISSUES:
+ - Queen path obstructed when moving up
+   even though nothing is in its way;
+   there is a pawn to its right and
+   a pawn below it
+"""
