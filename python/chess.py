@@ -374,10 +374,9 @@ def path_obstructed(board, move):
                 if b[m[0] + i][m[1] - i] != "_": return True
 
     if piece[0] == "Q":
-        # Behaves as a rook if there is no horizontal
-        # movement, and as a bishop otherwise
-        
-        if abs(right_movement) == 0:
+        # Behaves as a rook if the movement is in one dimension,
+        # and as a rook otherwise  
+        if forward_movement * right_movement == 0:
             # Rook
             if forward_movement != 0:
                 if piece[1] == "w":
