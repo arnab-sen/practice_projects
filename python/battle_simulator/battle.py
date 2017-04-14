@@ -5,6 +5,7 @@ TODO:
 - Fighters have up to four moves each and take turns attacking
 - First one to 0 HP loses the battle
 """
+import ast
 
 class Fighter:
     "Has HP and ATK"
@@ -38,9 +39,10 @@ class Fighter:
     
 
 def get_battle_data():
-    with open("data.txt") as file:
-        pass
-    pass
+    with open("fighters.txt") as file:
+        names_dict = ast.literal_eval(file.read())
+        names = [names_dict["fighter1"], names_dict["fighter2"]]
+    return names
 
 def initialise_battle(names, HPs, ATKs):
     fighter1 = Fighter(names[0], HPs[0], ATKs[0])
@@ -62,7 +64,7 @@ def battle(fighters):
     pass
 
 def main():
-    names = ["F1", "F2"]
+    names = get_battle_data()
     HPs = [100, 150]
     ATKs = [50, 25]
     fighters = initialise_battle(names, HPs, ATKs)
