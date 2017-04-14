@@ -14,35 +14,27 @@ class Fighter:
         self._HP = HP
         self._ATK = ATK
 
-    @property
-    def name(self):
-        "name getter"
+    def set_name(self, value):
+        self._name = value
+
+    def get_name(self):
         return self._name
 
-    @name.setter
-    def name(self, value):
-        "name setter"
-        self.name = value
-    
-    @property
-    def HP(self):
-        "HP getter"
+    def set_HP(self, value):
+        self._HP = value
+
+    def get_HP(self):
         return self._HP
 
-    @HP.setter
-    def HP(self, value):
-        "HP setter"
-        self.HP = value
-    
-    @property
-    def ATK(self):
-        "ATK getter"
+    def set_ATK(self, value):
+        self._name = value
+
+    def get_ATK(self):
         return self._ATK
 
-    @ATK.setter
-    def ATK(self, value):
-        "ATK setter"
-        self._ATK = value
+    name = property(get_name, set_name)
+    HP = property(get_HP, set_HP)
+    ATK = property(get_ATK, set_ATK)
     
 
 def get_battle_data():
@@ -61,11 +53,9 @@ def initialise_battle(names, HPs, ATKs):
 def attack(attacker, defender):
     a = attacker
     d = defender
-    d_HP = d.HP
-    a_ATK = a.ATK
     print(a.name + " attacks " + d.name)
     print(d.name + "'s HP fell from " + str(d.HP), end = "")
-    d.HP(d_HP - a_ATK)
+    d.HP = d.HP - a.ATK
     print(" to " + str(d.HP))
 
 def battle(fighters):
