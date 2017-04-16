@@ -36,19 +36,22 @@ def organise_results(data):
     
     print_results = True
     if print_results:
-        print("First Round:")
+        print("----------------First Round----------------")
         for i in range(len(first_round)):
             print(first_round[i][0][0] + ": " + first_round[i][0][1], end = " | ")
             print(first_round[i][1][0] + ": " + first_round[i][1][1])
-        print("\nConference Semifinals:")
+            if i == 3: print() 
+        print("\n-----------Conference Semifinals-----------")
         for i in range(len(conf_semi)):
             print(conf_semi[i][0][0] + ": " + conf_semi[i][0][1], end = " | ")
             print(conf_semi[i][1][0] + ": " + conf_semi[i][1][1])
-        print("\nConference Finals:")
+            if i == 1: print() 
+        print("\n-------------Conference Finals--------------")
         for i in range(len(conf_finals)):
             print(conf_finals[i][0][0] + ": " + conf_finals[i][0][1], end = " | ")
             print(conf_finals[i][1][0] + ": " + conf_finals[i][1][1])
-        print("\nNBA Finals:")
+            if i == 0: print() 
+        print("\n-----------------NBA Finals----------------")
         print(nba_finals[0][0] + ": " + nba_finals[0][1], end = " | ")
         print(nba_finals[1][0] + ": " + nba_finals[1][1])
 
@@ -104,7 +107,7 @@ def get_results(html_list, team_key, colour_key):
     else:
         #print("Empty")
         #print("Team TBD", "Score TBD")
-        return ["Team TBD", "Score TBD"], html_list
+        return ["TBD", "-"], html_list
 
 def clean_data(team_name, score, team_key, colour_key):
     # Extract team name
@@ -128,8 +131,11 @@ def clean_data(team_name, score, team_key, colour_key):
 
 def get_page():
     try:
-        year = input("Enter year: ")
-        if year == "" or int(year) > 2017: year = "2017"
+        year = input("Enter year (2001+): ")
+        if year == "" or int(year) > 2017 or int(year) < 2001:
+            print("There was an error with your input.")
+            print("2017 will be the year by default.\n")    
+            year = "2017"
     except:
         print("There was an error with your input.")
         print("2017 will be the year by default.")
@@ -161,10 +167,8 @@ def main():
         d, html_list = get_results(html_list, team_key, west_colour_key)
         data += [d]
     organise_results(data)
-    #for i in range(len(data)):
-     #   if i % 2 == 0 and i > 0: print()
-      #  print(data[i])
-
+     
+    #input("Press Enter to exit")
 
 main()
 
