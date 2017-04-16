@@ -52,6 +52,14 @@ def organise_results(data):
         print(nba_finals[0][0] + ": " + nba_finals[0][1], end = " | ")
         print(nba_finals[1][0] + ": " + nba_finals[1][1])
 
+def get_alternate_team_key(team_key):
+    # This is required for instances where the hyperlink
+    # for the team has e.g. "2014-15" rather than
+    # "2014%E2%80%9315"
+    alternate_key = team_key
+    alternate_key = team_key[0 : 4] + "-" + team_key[-2:]
+    return alternate_key
+
 def get_results(html_list, team_key, colour_key):
     # This function will extract match results
     # and return the html_list with those
@@ -80,13 +88,18 @@ def get_results(html_list, team_key, colour_key):
             
     score = html_list[index]
     html_list = html_list[index + 1:]
-    
+    alternate_team_key = get_alternate_team_key(team_key)
     #print(team_name)
     #print(score)
     #print(html_list[index])
     if team_key in team_name:
         #print("Not empty")
         team_name, score = clean_data(team_name, score, team_key, colour_key)
+        return [team_name, score], html_list
+    elif alternate_team_key in team_name:
+        #print("Not empty")
+        team_name, score = clean_data(team_name, score,\
+                                      alternate_team_key, colour_key)
         return [team_name, score], html_list
     else:
         #print("Empty")
@@ -113,17 +126,26 @@ def clean_data(team_name, score, team_key, colour_key):
     #print(team_name, score)
     return team_name, score
 
+def get_page():
+    try:
+        year = input("Enter year: ")
+        if year == "" or int(year) > 2017: year = "2017"
+    except:
+        print("There was an error with your input.")
+        print("2017 will be the year by default.")
+        year = "2017"
+
+    previous_year = str(int(year) - 1)
+    year_short = year[-2:]
+    playoffs = wikipedia.page("Template:" + year + "_NBA_Playoffs")
+    team_key = previous_year + "%E2%80%93" + year_short
+    page_html = playoffs.html()
+    
+    return page_html, team_key
+
 def main():
     data = []
-    year = 2016
-    if year == 2016:
-        playoffs_2016 = wikipedia.page("Template:2016_NBA_Playoffs")
-        page_html = playoffs_2016.html()
-        team_key = "2015%E2%80%9316"
-    elif year == 2017:
-        playoffs_2017 = wikipedia.page("Template:2017_NBA_Playoffs")
-        page_html = playoffs_2017.html()
-        team_key = "2016%E2%80%9317"
+    page_html, team_key = get_page()
     html_section = page_html
     start = html_section.find("<td height=\"7\">")
     html_section = html_section[start:]
