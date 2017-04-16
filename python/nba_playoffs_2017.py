@@ -3,7 +3,31 @@ This program obtains the results of the NBA Playoffs from Wikipedia,
 namely the data from the Bracket section.
 """
 import wikipedia
+
+def match_is_empty(html_section, team_key, colour_key):
+    if colour_key == "#87cefa":
+        check_key = "#87cefa;\"> &#160;<"
+    elif colour_key == "#ffaeb9":
+        check_key = "#ffaeb9\"> &#160;<"
+    start = html_section.find(colour_key)
+    html_section = html_section[start:]
+    team_name = html_section
+    print(team_name[:18], "vs", check_key)
+    if team_name[:18] != check_key:
+        html_section = html_section[start + 1:]
+        start = start = html_section.find(colour_key)
+        html_section = html_section[start + 1:]
+        return True, html_section
+    else: return False, html_section
+    #print(team_name[:17])
+    #print()
+    
+    
+
 def get_results(html_section, team_key, colour_key):
+    is_empty, html_section = match_is_empty(html_section, team_key, colour_key)
+    if is_empty:
+        return ["Team TBD", "Score TBD"], html_section
     # Get team name
     start = html_section.find(team_key) + len(team_key)
     html_section = html_section[start + 1:]
@@ -59,56 +83,62 @@ def organise_results(data):
 
     # Get nba finals match (7)
     nba_finals = matches[7]
-    
-    print("First Round:")
-    for i in first_round: print(i)
-    print("\nConference Semifinals:")
-    for i in conf_semi: print(i)
-    print("\nConference Finals:")
-    for i in conf_finals: print(i)
-    print("\nNBA Finals:")
-    print(nba_finals)
-        
-            
 
-data = []
-playoffs_2017 = wikipedia.page("2017 NBA Playoffs")
-playoffs_2016 = wikipedia.page("Template:2016_NBA_Playoffs")
-page_html = playoffs_2016.html()
-# Each team name links to their season page, which
-# all begin with "2015%E2%80%9316" ("2015-2016"); use this as a key
-team_key = "2015%E2%80%9316"
-html_section = page_html[page_html.find(team_key):]
+    print_results = True
+    if print_results:
+        print("First Round:")
+        for i in first_round: print(i)
+        print("\nConference Semifinals:")
+        for i in conf_semi: print(i)
+        print("\nConference Finals:")
+        for i in conf_finals: print(i)
+        print("\nNBA Finals:")
+        print(nba_finals)
+  
+def main():
+    data = []
+    playoffs_2017 = wikipedia.page("Template:2017_NBA_Playoffs")
+    playoffs_2016 = wikipedia.page("Template:2016_NBA_Playoffs")
+    #page_html = playoffs_2016.html()
+    page_html = playoffs_2017.html()
+    # Each team name links to their season page, which
+    # all begin with "2015%E2%80%9316" ("2015-2016"); use this as a key
+    #team_key = "2015%E2%80%9316"
+    team_key = "2016%E2%80%9317"
+    #html_section = page_html[page_html.find(team_key):]
+    html_section = page_html
+    #print(html_section)
+    #return
 
-#get_results(html_section, team_key, colour_key)
+    #get_results(html_section, team_key, colour_key)
 
-# data is a list of lists
-# Get Eastern Conference results
-colour_key = "#87cefa"
-for i in range(15):
-    d, html_section = get_results(html_section, team_key, colour_key)
-    data += [d]
+    # data is a list of lists
+    # Get Eastern Conference results
+    colour_key = "#87cefa"
+    for i in range(15):
+        d, html_section = get_results(html_section, team_key, colour_key)
+        data += [d]
 
-# Get Western Conference results
-colour_key = "#ffaeb9"
-for i in range(15):
-    d, html_section = get_results(html_section, team_key, colour_key)
-    data += [d]
+    # Get Western Conference results
+    colour_key = "#ffaeb9"
+    for i in range(15):
+        d, html_section = get_results(html_section, team_key, colour_key)
+        data += [d]
 
-organise_results(data)
-#print(data)
-#print(data[0][0], data[0][1])
-#print(data[1][0], data[1][1])
-count = 0
+    organise_results(data)
+    #print(data)
+    #print(data[0][0], data[0][1])
+    #print(data[1][0], data[1][1])
+    count = 0
 
-for i in data:
-    #if count % 2 == 0: print()
-    #print(i)
-    count += 1
-    #pass
+    for i in data:
+        #if count % 2 == 0: print()
+        #print(i)
+        count += 1
+        #pass
 
 
-#print(html_section)
+main()
 
 """
 ISSUES:
@@ -117,4 +147,6 @@ ISSUES:
   name comes up as "Los Angeles" rather than "Los Angeles
   Clippers" -- write a function that shortens all team
   names to their respective acronyms (e.g. CLE, LAC, GS)
+- Currently only works for a completed bracket; cannot handle
+  blank strings (like the ones in the 2017 bracket)
 """
