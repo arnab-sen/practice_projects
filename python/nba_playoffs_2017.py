@@ -2,7 +2,7 @@
 This program obtains the results of the NBA Playoffs from Wikipedia,
 namely the data from the Bracket section.
 """
-import wikipedia
+from wikipedia import *
 
 def organise_results(data):
     first_round = [""] * 8
@@ -132,6 +132,7 @@ def clean_data(team_name, score, team_key, colour_key):
 def get_page():
     try:
         year = input("Enter year (2001+): ")
+        print()
         if year == "" or int(year) > 2017 or int(year) < 2001:
             print("There was an error with your input.")
             print("2017 will be the year by default.\n")    
@@ -150,25 +151,27 @@ def get_page():
     return page_html, team_key
 
 def main():
-    data = []
-    page_html, team_key = get_page()
-    html_section = page_html
-    start = html_section.find("<td height=\"7\">")
-    html_section = html_section[start:]
-    html_list = html_section.split("</td>")
-    east_colour_key = "#87cefa"
-    west_colour_key = "#ffaeb9"
-    #for i in html_list: print(i)
-    for i in range(15):
-        d, html_list = get_results(html_list, team_key, east_colour_key)
-        data += [d]
+    while(1):
+        data = []
+        page_html, team_key = get_page()
+        html_section = page_html
+        start = html_section.find("<td height=\"7\">")
+        html_section = html_section[start:]
+        html_list = html_section.split("</td>")
+        east_colour_key = "#87cefa"
+        west_colour_key = "#ffaeb9"
+        #for i in html_list: print(i)
+        for i in range(15):
+            d, html_list = get_results(html_list, team_key, east_colour_key)
+            data += [d]
 
-    for i in range(15):
-        d, html_list = get_results(html_list, team_key, west_colour_key)
-        data += [d]
-    organise_results(data)
-     
-    #input("Press Enter to exit")
+        for i in range(15):
+            d, html_list = get_results(html_list, team_key, west_colour_key)
+            data += [d]
+        organise_results(data)
+         
+        restart = input("\nWould you like to enter another year? (y/n): ")
+        if restart.lower() != "y": break
 
 main()
 
