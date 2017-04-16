@@ -33,23 +33,30 @@ def organise_results(data):
 
     # Get nba finals match (7)
     nba_finals = matches[7]
-
+    
     print_results = True
     if print_results:
         print("First Round:")
-        for i in first_round: print(i)
+        for i in range(len(first_round)):
+            print(first_round[i][0][0] + ": " + first_round[i][0][1], end = " | ")
+            print(first_round[i][1][0] + ": " + first_round[i][1][1])
         print("\nConference Semifinals:")
-        for i in conf_semi: print(i)
+        for i in range(len(conf_semi)):
+            print(conf_semi[i][0][0] + ": " + conf_semi[i][0][1], end = " | ")
+            print(conf_semi[i][1][0] + ": " + conf_semi[i][1][1])
         print("\nConference Finals:")
-        for i in conf_finals: print(i)
+        for i in range(len(conf_finals)):
+            print(conf_finals[i][0][0] + ": " + conf_finals[i][0][1], end = " | ")
+            print(conf_finals[i][1][0] + ": " + conf_finals[i][1][1])
         print("\nNBA Finals:")
-        print(nba_finals)
+        print(nba_finals[0][0] + ": " + nba_finals[0][1], end = " | ")
+        print(nba_finals[1][0] + ": " + nba_finals[1][1])
 
 def get_results(html_list, team_key, colour_key):
     # This function will extract match results
     # and return the html_list with those
     # results removed
-    html_list[0] = "Empty element!"
+
     # Get team name   
     for i in range(len(html_list)):
         #print(html_list[i])
@@ -108,7 +115,7 @@ def clean_data(team_name, score, team_key, colour_key):
 
 def main():
     data = []
-    year = 2017
+    year = 2016
     if year == 2016:
         playoffs_2016 = wikipedia.page("Template:2016_NBA_Playoffs")
         page_html = playoffs_2016.html()
@@ -146,6 +153,4 @@ ISSUES:
   name comes up as "Los Angeles" rather than "Los Angeles
   Clippers" -- write a function that shortens all team
   names to their respective acronyms (e.g. CLE, LAC, GS)
-- Currently only works for a completed bracket; cannot handle
-  blank strings (like the ones in the 2017 bracket)
 """
