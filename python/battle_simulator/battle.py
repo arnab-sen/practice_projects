@@ -39,7 +39,7 @@ class Fighter:
     
 
 def get_battle_data():
-    with open("fighters.txt") as file:
+    with open("Resources\\fighters.txt") as file:
         names_dict = ast.literal_eval(file.read())
         names = [names_dict["fighter1"], names_dict["fighter2"]]
     return names
