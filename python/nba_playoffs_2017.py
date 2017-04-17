@@ -2,7 +2,7 @@
 This program obtains the results of the NBA Playoffs from Wikipedia,
 namely the data from the Bracket section.
 """
-from wikipedia import *
+import wikipedia
 
 def organise_results(data):
     first_round = [""] * 8
@@ -59,9 +59,7 @@ def get_alternate_team_key(team_key):
     # This is required for instances where the hyperlink
     # for the team has e.g. "2014-15" rather than
     # "2014%E2%80%9315"
-    alternate_key = team_key
-    alternate_key = team_key[0 : 4] + "-" + team_key[-2:]
-    return alternate_key
+    return team_key[0 : 4] + "-" + team_key[-2:]
 
 def get_results(html_list, team_key, colour_key):
     # This function will extract match results
@@ -92,9 +90,7 @@ def get_results(html_list, team_key, colour_key):
     score = html_list[index]
     html_list = html_list[index + 1:]
     alternate_team_key = get_alternate_team_key(team_key)
-    #print(team_name)
-    #print(score)
-    #print(html_list[index])
+
     if team_key in team_name:
         #print("Not empty")
         team_name, score = clean_data(team_name, score, team_key, colour_key)
@@ -106,45 +102,64 @@ def get_results(html_list, team_key, colour_key):
         return [team_name, score], html_list
     else:
         #print("Empty")
-        #print("Team TBD", "Score TBD")
         return ["TBD", "-"], html_list
 
 def clean_data(team_name, score, team_key, colour_key):
     # Extract team name
-    start = team_name.find(team_key) + len(team_key)
-    team_name = team_name[start + 1:]
-    underscores = [team_name.find("_"), ""]
-    temp = team_name[underscores[0] + 1:]
-    underscores[1] = underscores[0] + temp.find("_")
-    u = underscores
-    t = team_name
-    team_name = t[:u[0]] + " " + t[u[0] + 1: u[1] + 1]
-    # Can use team name to abbreviation converter here
-
+    # Special checks for team names with more than
+    # two words
+    if "Lakers" in team_name:
+        team_name = "Los Angeles Lakers"
+    elif "Clippers" in team_name:
+        team_name = "Los Angeles Clippers"
+    elif "Portland" in team_name:
+        team_name = "Portland Trail Blazers"
+    elif "Thunder" in team_name:
+        team_name = "Oklahoma City Thunder"
+    elif "Golden" in team_name:
+        team_name = "Golden State Warriors"
+    elif "Spurs" in team_name:
+        team_name = "San Antonio Spurs"
+    elif "Pelicans" in team_name:
+        team_name = "New Orleans Pelicans"
+    elif "Knicks" in team_name:
+        team_name = "New York Knicks"
+    else:
+        start = team_name.find(team_key) + len(team_key)
+        team_name = team_name[start + 1:]
+        underscores = [team_name.find("_"), ""]
+        temp = team_name[underscores[0] + 1:]
+        underscores[1] = underscores[0] + temp.find("_")
+        u = underscores
+        t = team_name
+        team_name = t[:u[0]] + " " + t[u[0] + 1: u[1] + 1]
+        
     # Extract score
     start = score.find(colour_key)
     score = score[start + len(colour_key) + 4:]
     if score[0] == "<": score = score[3]
     else: score = score[0]
-    #print(team_name, score)
+    
     return team_name, score
 
 def get_page():
+    # Get the raw HTML from the bracket template page
+    year = input("Enter year (2001+): ")
+    print()
+    if year == "" or int(year) < 2001:
+        print("There was an error with your input.")
+        print("2017 will be the year by default.\n")    
+        year = "2017"
     try:
-        year = input("Enter year (2001+): ")
-        print()
-        if year == "" or int(year) > 2017 or int(year) < 2001:
-            print("There was an error with your input.")
-            print("2017 will be the year by default.\n")    
-            year = "2017"
+        playoffs = wikipedia.page("Template:" + year + "_NBA_Playoffs")
     except:
         print("There was an error with your input.")
-        print("2017 will be the year by default.")
+        print("2017 will be the year by default.\n")
         year = "2017"
-
+        playoffs = wikipedia.page("Template:" + year + "_NBA_Playoffs")
+        
     previous_year = str(int(year) - 1)
     year_short = year[-2:]
-    playoffs = wikipedia.page("Template:" + year + "_NBA_Playoffs")
     team_key = previous_year + "%E2%80%93" + year_short
     page_html = playoffs.html()
     
@@ -160,7 +175,7 @@ def main():
         html_list = html_section.split("</td>")
         east_colour_key = "#87cefa"
         west_colour_key = "#ffaeb9"
-        #for i in html_list: print(i)
+        
         for i in range(15):
             d, html_list = get_results(html_list, team_key, east_colour_key)
             data += [d]
@@ -168,18 +183,10 @@ def main():
         for i in range(15):
             d, html_list = get_results(html_list, team_key, west_colour_key)
             data += [d]
+            
         organise_results(data)
          
         restart = input("\nWould you like to enter another year? (y/n): ")
         if restart.lower() != "y": break
 
 main()
-
-"""
-ISSUES:
-- Team names only show the first two words, which is fine for
-  e.g. Cleveland Cavaliers, but for the Clippers, their team
-  name comes up as "Los Angeles" rather than "Los Angeles
-  Clippers" -- write a function that shortens all team
-  names to their respective acronyms (e.g. CLE, LAC, GS)
-"""
