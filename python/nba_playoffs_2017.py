@@ -68,12 +68,10 @@ def get_results(html_list, team_key, colour_key):
 
     # Get team name   
     for i in range(len(html_list)):
-        #print(html_list[i])
         if colour_key in html_list[i]:            
             index = i
             break
-        else:
-            index = 0
+        else: index = 0
 
     team_name = html_list[index]
     html_list = html_list[index + 1:]
@@ -84,46 +82,40 @@ def get_results(html_list, team_key, colour_key):
         if colour_key in html_list[i]:            
             index = i
             break
-        else:
-            index = 0
+        else: index = 0         
             
     score = html_list[index]
     html_list = html_list[index + 1:]
     alternate_team_key = get_alternate_team_key(team_key)
 
     if team_key in team_name:
-        #print("Not empty")
         team_name, score = clean_data(team_name, score, team_key, colour_key)
         return [team_name, score], html_list
     elif alternate_team_key in team_name:
-        #print("Not empty")
         team_name, score = clean_data(team_name, score,\
                                       alternate_team_key, colour_key)
         return [team_name, score], html_list
-    else:
-        #print("Empty")
-        return ["TBD", "-"], html_list
+    else: return ["TBD", "-"], html_list
+
+def check_name(key, team_name, full_name):
+    if key in team_name: team_name = full_name
+    return team_name
 
 def clean_data(team_name, score, team_key, colour_key):
     # Extract team name
-    # Special checks for team names with more than
-    # two words
-    if "Lakers" in team_name:
-        team_name = "Los Angeles Lakers"
-    elif "Clippers" in team_name:
-        team_name = "Los Angeles Clippers"
-    elif "Portland" in team_name:
-        team_name = "Portland Trail Blazers"
-    elif "Thunder" in team_name:
-        team_name = "Oklahoma City Thunder"
-    elif "Golden" in team_name:
-        team_name = "Golden State Warriors"
-    elif "Spurs" in team_name:
-        team_name = "San Antonio Spurs"
-    elif "Pelicans" in team_name:
-        team_name = "New Orleans Pelicans"
-    elif "Knicks" in team_name:
-        team_name = "New York Knicks"
+    # Check for a team name with more than two words
+    t = check_name("Lakers", team_name, "Los Angeles Lakers")
+    t = check_name("Clippers", t, "Los Angeles Clippers")
+    t = check_name("Portland", t, "Portland Trail Blazers")
+    t = check_name("Thunder", t, "Oklahoma City Thunder")
+    t = check_name("Golden", t, "Golden State Warriors")
+    t = check_name("Spurs", t, "San Antonio Spurs")
+    t = check_name("Pelicans", t, "New Orleans Pelicans")
+    t = check_name("Knicks", t, "New York Knicks")
+    t = check_name("Jersey", t, "New Jersey Nets")
+                   
+    if t != team_name:
+        team_name = t
     else:
         start = team_name.find(team_key) + len(team_key)
         team_name = team_name[start + 1:]
@@ -165,27 +157,25 @@ def get_page():
     
     return page_html, team_key
 
+def get_all_results(html_list, team_key):
+    data = []
+    colour_key = "#87cefa" # Eastern conference
+    for i in range(30):
+        if i == 15: colour_key = "#ffaeb9" # Western conference
+        d, html_list = get_results(html_list, team_key, colour_key)
+        data += [d]
+         
+    return organise_results(data)
+
 def main():
     while(1):
-        data = []
         page_html, team_key = get_page()
         html_section = page_html
         start = html_section.find("<td height=\"7\">")
         html_section = html_section[start:]
         html_list = html_section.split("</td>")
-        east_colour_key = "#87cefa"
-        west_colour_key = "#ffaeb9"
         
-        for i in range(15):
-            d, html_list = get_results(html_list, team_key, east_colour_key)
-            data += [d]
-
-        for i in range(15):
-            d, html_list = get_results(html_list, team_key, west_colour_key)
-            data += [d]
-            
-        organise_results(data)
-         
+        get_all_results(html_list, team_key)
         restart = input("\nWould you like to enter another year? (y/n): ")
         if restart.lower() != "y": break
 
