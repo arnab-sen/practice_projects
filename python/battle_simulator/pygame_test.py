@@ -19,6 +19,7 @@ pygame.font.init()
 myfont = pygame.font.SysFont('Verdana', 25)
 text_colour = (0, 0, 0) # black
 anti_alias = True
+
 # Note that positions are in (width, height) or (x, y) rather than (row, col)
 move_1_surface = myfont.render(move_1, anti_alias, text_colour)
 move_2_surface = myfont.render(move_2, anti_alias, text_colour)
@@ -28,8 +29,6 @@ move_power = myfont.render('Move Power', anti_alias, text_colour)
 #screen.blit(textsurface,(0,0))
 
 size = width, height = 720, 480
-speed = [2, 2]
-black = 0, 0, 0
 
 screen = pygame.display.set_mode(size)
 pokemon_1 = str(random.randrange(650))
@@ -42,15 +41,13 @@ elif len(pokemon_2) == 2: pokemon_2 = "0" + pokemon_2
 pokemon_position = (380, -20)
 if pokemon_1 == "632": pokemon_position = (380, 20)
 # Test pokemon
-# Original size: 96 x 96, want 3x size -> 167 x 167
+# Original size: 96 x 96, scaled size = 288, 288
 f2 = pygame.image.load("bw-001n\\" + pokemon_2 + ".png")
 f2 = pygame.transform.scale(f2, (288, 288))
 f1 = pygame.image.load("bwback-001n\\" + pokemon_1 + ".png")
 f1 = pygame.transform.scale(f1, (288, 288))
-#f2 = pygame.image.load("f2.png")
 bg = pygame.image.load("battle_screen_with_moves_blank.png")
 moves_bar = pygame.image.load("moves_bar.png")
-#pygame.display.toggle_fullscreen()
 
 
 while 1:
