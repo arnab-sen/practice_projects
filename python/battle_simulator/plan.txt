@@ -1,0 +1,6 @@
+TODO:
+- Make moves into buttons -> pressing move makes e.g. "current_move = move_1"
+- Incorporate battle_simulator.py logic:
+	- Fighter class --> Pokemon class
+	- Each pokemon is assigned the sprite (get a dict of {national dex no. : pokemon name} e.g. "001" : "Bulbasaur")
+	- Scrape move lists from serebii
