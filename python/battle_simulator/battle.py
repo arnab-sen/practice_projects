@@ -6,6 +6,8 @@ TODO:
 - First one to 0 HP loses the battle
 """
 import ast
+import get_pokemon_info
+import random
 
 class Fighter:
     "Has HP and ATK"
@@ -37,6 +39,9 @@ class Fighter:
     HP = property(get_HP, set_HP)
     ATK = property(get_ATK, set_ATK)
     
+def get_pokemon_names():
+    pokemon = get_pokemon_info.get_dict("numbered_pokemon.txt")
+    return pokemon
 
 def get_battle_data():
     with open("Resources\\fighters.txt") as file:
@@ -64,7 +69,12 @@ def battle(fighters):
     pass
 
 def main():
-    names = get_battle_data()
+    pokemon = get_pokemon_names()
+    #names = get_battle_data()
+    nums = [random.randrange(1, 650), random.randrange(1, 650)]
+    nums[0] = get_pokemon_info.pokemon_number(nums[0])
+    nums[1] = get_pokemon_info.pokemon_number(nums[1])
+    names = [pokemon[nums[0]], pokemon[nums[1]]]
     HPs = [100, 150]
     ATKs = [50, 25]
     fighters = initialise_battle(names, HPs, ATKs)
