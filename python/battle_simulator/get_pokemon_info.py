@@ -13,6 +13,7 @@ and saves the information in text files:
 import urllib.request
 import os.path
 import ast
+import random
 from bs4 import BeautifulSoup
 
 def get_pokemon_from_region(main_text, first_pokemon, last_pokemon, region):
@@ -124,9 +125,13 @@ def get_pokemon_movesets():
     else: print("pokemon_movesets.txt already exists! Using the existing file.")
           
 def get_dict(dict_name):
-    if os.path.isfile("Resources\\" + dict_name + ".txt"):
-        with open("Resources\\" + dict_name, 'r') as file:
-            return ast.literal_eval(file.read())
+    if file_exists("Resources\\" + dict_name + ".txt"):
+        try:
+            with open("Resources\\" + dict_name, 'r') as file:
+                return ast.literal_eval(file.read())
+        except SyntaxError:
+            print("Dictionary has incorrect syntax!")
+            print("Check that it follows the form {key1:value, key2:value}")
     else:
         print("File " + dict_name + " not found!")
 
@@ -247,11 +252,51 @@ def get_move_dict(move_list):
 
     return move_dict
 
+def file_exists(file_path):
+    try:
+        os.path.isfile(file_path)
+        return True
+    except SyntaxError: print("Syntax of file is incorrect!")
+    return False
+
+def get_pokemon_types():
+    pass
+
+def generate_moveset(*types):
+    # Returns all moves of the type types[0] and all
+    # moves of types[1] if there is a second type
+    # Currently excludes the moves from the "other" set
+    if not(file_exists("Resources\\all_moves.txt")):
+        get_attackdex()
+    physical_moves = get_dict("physical_moves.txt")
+    special_moves = get_dict("special_moves.txt")
+    other_moves = get_dict("other_moves.txt")
+
+    moves = []
+    # Get all physical and special moves of the type(s)
+    for i in range(len(types)):
+        for key in physical_moves:
+            if physical_moves[key][0] == types[i]:
+                moves += [key]
+        for key in special_moves:
+            if special_moves[key][0] == types[i]:
+                moves += [key]
+
+    return moves
+
 def dict_to_string(dictionary):
+    # A neater alternative for converting a dict to a string:
+    # While str(dict) creates "{key_1:value_1, ..., key_n:value_n}",
+    # dict_to_string(dict) creates
+    # "{
+    #   key_1 : value_1,
+    #   ...,
+    #   key_n : value_n
+    # }"
     d = dictionary
     dict_string = "{"
     for key in d:
-        dict_string += "\n\t" + str(key) + " : " + str(d[key]) + ","
+        dict_string += "\n\t'" + str(key) + "' : " + str(d[key]) + ","
     dict_string += "\n}"
     return dict_string
 
@@ -264,16 +309,7 @@ if __name__ == "__main__":
     #get_numbered_pokemon()
     #get_pokemon_movesets()
     #d = get_dict("all_moves.txt")
-    fix_dict("pokemon_movesets.txt")
+    #fix_dict("pokemon_movesets.txt")
     #movesets = get_dict("pokemon_movesets.txt")
-    #pokemon_names = get_dict("numbered_pokemon.txt")
-    show_moves = False
-    if show_moves:
-        for i in range(1, len(movesets)):
-            num = pokemon_number(i)
-            print("\n" + pokemon_names[num] + ": ")
-            for j in range(0, len(movesets[num][0]), 3):
-                print(movesets[num][0][j], movesets[num][0][j + 1], movesets[num][0][j + 2])
-
-      
+    #pokemon_names = get_dict("numbered_pokemon.txt")    
 
