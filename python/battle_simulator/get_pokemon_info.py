@@ -14,7 +14,7 @@ import urllib.request
 import os.path
 import ast
 import random
-import thread
+import threading
 from bs4 import BeautifulSoup
 
 def get_pokemon_from_region(main_text, first_pokemon, last_pokemon, region):
@@ -93,27 +93,6 @@ def is_integer(string_):
     except:
         return False
 
-def multithread_get_html(urls):
-    # Want 13 threads
-    html_list = [[]]
-    
-    html_list[0] = thread.start_new_thread(get_html, (urls[:50], "neat"))
-    html_list[1] = thread.start_new_thread(get_html, (urls[50:100], "neat"))
-    html_list[2] = thread.start_new_thread(get_html, (urls[100:150], "neat"))
-    html_list[3] = thread.start_new_thread(get_html, (urls[150:200], "neat"))
-    html_list[4] = thread.start_new_thread(get_html, (urls[200:250], "neat"))
-    html_list[5] = thread.start_new_thread(get_html, (urls[250:300], "neat"))
-    html_list[6] = thread.start_new_thread(get_html, (urls[300:350], "neat"))
-    html_list[7] = thread.start_new_thread(get_html, (urls[350:400], "neat"))
-    html_list[8] = thread.start_new_thread(get_html, (urls[400:450], "neat"))
-    html_list[9] = thread.start_new_thread(get_html, (urls[450:500], "neat"))
-    html_list[10] = thread.start_new_thread(get_html, (urls[500:550], "neat"))
-    html_list[11] = thread.start_new_thread(get_html, (urls[550:600], "neat"))
-    html_list[12] = thread.start_new_thread(get_html, (urls[600:649], "neat"))
-
-    return html_list
-    
-    
 def get_pokemon_movesets():
     if not(os.path.isfile("Resources\\pokemon_movesets.txt")):
         move_sets = {} # {pokemon_num : [move name, attack, accuracy]}
@@ -148,7 +127,7 @@ def get_pokemon_movesets():
     else: print("pokemon_movesets.txt already exists! Using the existing file.")
           
 def get_dict(dict_name):
-    if file_exists("Resources\\" + dict_name + ".txt"):
+    if not(file_exists("Resources\\" + dict_name + ".txt")):
         try:
             with open("Resources\\" + dict_name, 'r') as file:
                 return ast.literal_eval(file.read())
@@ -292,6 +271,7 @@ def get_pokemon_types_dict():
     # Returns a dict of form {"pokemon" : ["type1", "type2"]},
     # where type2 is "" if the pokemon only has one type
     all_types = get_pokemon_types_list()
+    pokemon = get_dict("numbered_pokemon.txt")
     types_dict = {}
     for i in all_types:
         url = "http://www.serebii.net/pokedex-bw/" + i + ".shtml"
@@ -301,22 +281,25 @@ def get_pokemon_types_dict():
         end = len(html) - 1
         # Shorten the html list
         for j in range(len(html)):
-            if "table class=\"pkmn\"" in html[j]:
+            if 'table class="pkmn"' in html[j]:
                 start = j
+                break
+        for j in range(len(html)):
             if 'td bgcolor="#507C36" height="86"' in html[j]:
                 end = j
+                break
         html = html[start : end]
-        for j in range(len(html)):
-            if 'a href="/pokedex-bw' in html[j]:
-                name = html[j + 1].strip()
+        for j in html:
+            name = j.strip()
+            if name in pokemon.values():
                 if name in types_dict:
-                    types_dict[name] = [types_dict[name], i]
+                    types_dict[name] += [i]
                 else:
-                    types_dict[name] = i
+                    types_dict[name] = [i]
+        print("Type: " + i + " done!")
+    print("All done!")
+    return types_dict
                 
-        
-    
-
 def generate_moveset(*types):
     # Returns all moves of the type types[0] and all
     # moves of types[1] if there is a second type
@@ -339,6 +322,13 @@ def generate_moveset(*types):
 
     return moves
 
+def get_random_elements(list_, num_elements_wanted):
+    random_selection = []
+    for i in range(num_elements_wanted):
+        random_selection += list_[random.randrange(len(list_))]
+
+    return random_selection
+
 def dict_to_string(dictionary):
     # A neater alternative for converting a dict to a string:
     # While str(dict) creates "{key_1:value_1, ..., key_n:value_n}",
@@ -352,6 +342,7 @@ def dict_to_string(dictionary):
     dict_string = "{"
     for key in d:
         dict_string += "\n\t'" + str(key) + "' : " + str(d[key]) + ","
+    dict_string = dict_string[:-1] # remove the final comma
     dict_string += "\n}"
     return dict_string
 
@@ -362,10 +353,16 @@ def write_string_to_file(content, filename):
 if __name__ == "__main__":
     #get_attackdex()
     #get_numbered_pokemon()
+    #d = get_dict("numbered_pokemon.txt")
+    #with open("Resources\\numbered_pokemon.txt", "r") as file:
+    #    d = ast.literal_eval(file.read())
+    #    print(d["003"])
     #get_pokemon_movesets()
     #d = get_dict("all_moves.txt")
     #fix_dict("pokemon_movesets.txt")
     #movesets = get_dict("pokemon_movesets.txt")
     #pokemon_names = get_dict("numbered_pokemon.txt")
-    get_pokemon_types_dict()
+    write_string_to_file(dict_to_string(get_pokemon_types_dict()), "pokemon_types.txt")
+    #html = get_html("http://www.serebii.net/pokedex-bw/bug.shtml", "neat")
+    #print(html)
 
