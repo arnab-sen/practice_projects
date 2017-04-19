@@ -14,6 +14,7 @@ import urllib.request
 import os.path
 import ast
 import random
+import thread
 from bs4 import BeautifulSoup
 
 def get_pokemon_from_region(main_text, first_pokemon, last_pokemon, region):
@@ -86,10 +87,32 @@ def pokemon_number(number):
     return ["00" + number, "0" + number, number][len(number) - 1]
 
 def is_integer(string_):
-    try: i = int(string_)
-    except: return False
+    try:
+        i = int(string_)
+        return True
+    except:
+        return False
 
-    return True
+def multithread_get_html(urls):
+    # Want 13 threads
+    html_list = [[]]
+    
+    html_list[0] = thread.start_new_thread(get_html, (urls[:50], "neat"))
+    html_list[1] = thread.start_new_thread(get_html, (urls[50:100], "neat"))
+    html_list[2] = thread.start_new_thread(get_html, (urls[100:150], "neat"))
+    html_list[3] = thread.start_new_thread(get_html, (urls[150:200], "neat"))
+    html_list[4] = thread.start_new_thread(get_html, (urls[200:250], "neat"))
+    html_list[5] = thread.start_new_thread(get_html, (urls[250:300], "neat"))
+    html_list[6] = thread.start_new_thread(get_html, (urls[300:350], "neat"))
+    html_list[7] = thread.start_new_thread(get_html, (urls[350:400], "neat"))
+    html_list[8] = thread.start_new_thread(get_html, (urls[400:450], "neat"))
+    html_list[9] = thread.start_new_thread(get_html, (urls[450:500], "neat"))
+    html_list[10] = thread.start_new_thread(get_html, (urls[500:550], "neat"))
+    html_list[11] = thread.start_new_thread(get_html, (urls[550:600], "neat"))
+    html_list[12] = thread.start_new_thread(get_html, (urls[600:649], "neat"))
+
+    return html_list
+    
     
 def get_pokemon_movesets():
     if not(os.path.isfile("Resources\\pokemon_movesets.txt")):
@@ -253,14 +276,46 @@ def get_move_dict(move_list):
     return move_dict
 
 def file_exists(file_path):
-    try:
-        os.path.isfile(file_path)
-        return True
-    except SyntaxError: print("Syntax of file is incorrect!")
-    return False
+    if os.path.isfile(file_path): return True
+    else: return False
 
-def get_pokemon_types():
-    pass
+def get_pokemon_types_list():
+    # Returns a list of all pokemon types
+    all_types = ["bug", "dark", "dragon", "electric", "fighting",\
+                 "fire", "flying", "ghost", "grass", "ground",\
+                 "ice", "normal", "poison", "psychic", "rock",\
+                 "steel", "water"]
+    
+    return all_types
+
+def get_pokemon_types_dict():
+    # Returns a dict of form {"pokemon" : ["type1", "type2"]},
+    # where type2 is "" if the pokemon only has one type
+    all_types = get_pokemon_types_list()
+    types_dict = {}
+    for i in all_types:
+        url = "http://www.serebii.net/pokedex-bw/" + i + ".shtml"
+        html = get_html(url, "neat")
+        html = html.split("\n")
+        start = 0
+        end = len(html) - 1
+        # Shorten the html list
+        for j in range(len(html)):
+            if "table class=\"pkmn\"" in html[j]:
+                start = j
+            if 'td bgcolor="#507C36" height="86"' in html[j]:
+                end = j
+        html = html[start : end]
+        for j in range(len(html)):
+            if 'a href="/pokedex-bw' in html[j]:
+                name = html[j + 1].strip()
+                if name in types_dict:
+                    types_dict[name] = [types_dict[name], i]
+                else:
+                    types_dict[name] = i
+                
+        
+    
 
 def generate_moveset(*types):
     # Returns all moves of the type types[0] and all
@@ -300,9 +355,9 @@ def dict_to_string(dictionary):
     dict_string += "\n}"
     return dict_string
 
-def write_string_to_file(string_, filename):
+def write_string_to_file(content, filename):
     with open("Resources\\" + filename, "w") as file:
-        file.write(string_)
+        file.write(content)
 
 if __name__ == "__main__":
     #get_attackdex()
@@ -311,5 +366,6 @@ if __name__ == "__main__":
     #d = get_dict("all_moves.txt")
     #fix_dict("pokemon_movesets.txt")
     #movesets = get_dict("pokemon_movesets.txt")
-    #pokemon_names = get_dict("numbered_pokemon.txt")    
+    #pokemon_names = get_dict("numbered_pokemon.txt")
+    get_pokemon_types_dict()
 
