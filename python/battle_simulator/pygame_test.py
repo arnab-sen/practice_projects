@@ -1,4 +1,5 @@
 import sys, pygame, time, random
+import get_pokemon_info
 # Get a random pokemon with random moves selected from that
 # Pokemon's moveset (will need multiple dicts for pokemon
 # and their movesets --> use webscraping from serebii
@@ -23,8 +24,6 @@ quadrant_3 = pygame.Rect(18, 410, quadrant_width, quadrant_height)
 quadrant_4 = pygame.Rect(241, 410, quadrant_width, quadrant_height)
 move_quadrants = [quadrant_1, quadrant_2, quadrant_3, quadrant_4]
 
-#move_1 = input("Enter move 1: ")
-moves = ["Scratch", "Water Gun", "Bite", "Ice Fang"]
 pygame.init()
 pygame.font.init()
 #myfont = pygame.font.SysFont('Verdana', 25)
@@ -38,18 +37,11 @@ blue = (0, 0, 255)
 text_colour = black
 anti_alias = True
 
-# Note that positions are in (width, height) or (x, y) rather than (row, col)
-move_1_surface = myfont.render(moves[0], anti_alias, text_colour)
-move_2_surface = myfont.render(moves[1], anti_alias, text_colour)
-move_3_surface = myfont.render(moves[2], anti_alias, text_colour)
-move_4_surface = myfont.render(moves[3], anti_alias, text_colour)
-move_power = myfont.render('Move Power', anti_alias, text_colour)
-#screen.blit(textsurface,(0,0))
-
 size = width, height = 720, 480
 
 screen = pygame.display.set_mode(size)
 
+# Get pokemon
 pokemon_1 = str(random.randrange(1, 650))
 if len(pokemon_1) == 1: pokemon_1 = "00" + pokemon_1
 elif len(pokemon_1) == 2: pokemon_1 = "0" + pokemon_1
@@ -57,7 +49,8 @@ pokemon_2 = str(random.randrange(1, 650))
 if len(pokemon_2) == 1: pokemon_2 = "00" + pokemon_2
 elif len(pokemon_2) == 2: pokemon_2 = "0" + pokemon_2
 #pokemon_2 = "466"
-pokemon_1 = "158"
+pokemon_1 = "158" # Totodile
+pokemon_2 = "009" # Charizard
 pokemon_position = (420, 50)
 if pokemon_1 == "632": pokemon_position = (380, 20)
 # Test pokemon
@@ -69,6 +62,26 @@ f1 = pygame.image.load("Resources\\bwback-001n\\" + pokemon_1 + ".png")
 f1 = pygame.transform.scale(f1, (288, 288))
 bg = pygame.image.load("Resources\\battle_screen_with_moves_blank.png")
 moves_bar = pygame.image.load("Resources\\moves_bar.png")
+
+# Get moves
+#move_1 = input("Enter move 1: ")
+moves = ["Scratch", "Water Gun", "Bite", "Ice Fang"]
+physical_moves = get_pokemon_info.get_dict("physical_moves.txt")
+special_moves = get_pokemon_info.get_dict("special_moves.txt")
+all_moves = {**physical_moves, **special_moves}
+movesets = get_pokemon_info.get_dict("pokemon_movesets.txt")
+poke_1 = "Totodile"
+poke_2 = "Charizard"
+move_exists = get_pokemon_info.move_exists(poke_1, movesets)
+moves = get_pokemon_info.get_random_moves(poke_1, move_exists) 
+
+# Note that positions are in (width, height) or (x, y) rather than (row, col)
+move_1_surface = myfont.render(moves[0], anti_alias, text_colour)
+move_2_surface = myfont.render(moves[1], anti_alias, text_colour)
+move_3_surface = myfont.render(moves[2], anti_alias, text_colour)
+move_4_surface = myfont.render(moves[3], anti_alias, text_colour)
+move_power = myfont.render('Move Power', anti_alias, text_colour)
+#screen.blit(textsurface,(0,0))
 
 def mouse_in_quadrant(mouse_position, move_quadrants):
     for i in range(4):

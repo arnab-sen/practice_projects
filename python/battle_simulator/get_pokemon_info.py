@@ -371,7 +371,12 @@ def get_random_moves(pokemon_name, moveset_exists):
     random_moveset = get_random_elements(move_pool, number_of_moves, no_repeats)
 
     return random_moveset
-    
+
+def move_exists(key, movesets):
+    if len(movesets[key]) < 4:
+        return False
+    else: return True
+  
 def get_base_stats():
     pass
 
