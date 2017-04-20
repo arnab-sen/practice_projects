@@ -353,14 +353,22 @@ def write_string_to_file(content, filename):
     with open("Resources\\" + filename, "w") as file:
         file.write(content)
 
-def get_random_moves(pokemon_name):
+def get_random_moves(pokemon_name, moveset_exists):
     # Return a set of four unique moves for a given pokemon, based
-    # on its type(s)
+    # on its type(s); a new moveset is created if one doesn't already
+    # exist
     pokemon_name = pokemon_name[0].upper() + pokemon_name[1:].lower()
-    pokemon_types = get_dict("pokemon_types.txt")
-    move_pool = generate_moveset(*pokemon_types[pokemon_name])
+    
+    if moveset_exists:
+        movesets = get_dict("pokemon_movesets.txt")
+        move_pool = movesets[pokemon_name]
+    else:
+        pokemon_types = get_dict("pokemon_types.txt")
+        move_pool = generate_moveset(*pokemon_types[pokemon_name])
+        
     no_repeats = True
-    random_moveset = get_random_elements(move_pool, 4, no_repeats)
+    number_of_moves = 4
+    random_moveset = get_random_elements(move_pool, number_of_moves, no_repeats)
 
     return random_moveset
     
@@ -382,6 +390,7 @@ if __name__ == "__main__":
     #write_string_to_file(dict_to_string(get_pokemon_types_dict()), "pokemon_types.txt")
     #html = get_html("http://www.serebii.net/pokedex-bw/bug.shtml", "neat")
     #print(html)
-    #print(get_random_moves("Gyarados")) 
+    moveset_exists = True
+    print(get_random_moves("Gyarados", moveset_exists)) 
     
 
