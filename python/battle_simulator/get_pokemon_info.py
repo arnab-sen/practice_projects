@@ -14,7 +14,6 @@ import urllib.request
 import os.path
 import ast
 import random
-import threading
 from bs4 import BeautifulSoup
 
 def get_pokemon_from_region(main_text, first_pokemon, last_pokemon, region):
@@ -308,7 +307,7 @@ def generate_moveset(*types):
         get_attackdex()
     physical_moves = get_dict("physical_moves.txt")
     special_moves = get_dict("special_moves.txt")
-    other_moves = get_dict("other_moves.txt")
+    #other_moves = get_dict("other_moves.txt")
 
     moves = []
     # Get all physical and special moves of the type(s)
@@ -322,11 +321,15 @@ def generate_moveset(*types):
 
     return moves
 
-def get_random_elements(list_, num_elements_wanted):
+def get_random_elements(list_, num_elements_wanted, no_repeats):
     random_selection = []
     for i in range(num_elements_wanted):
-        random_selection += list_[random.randrange(len(list_))]
-
+        rand = random.randrange(len(list_))
+        if no_repeats:
+            while list_[rand] in random_selection:
+                rand = random.randrange(len(list_))
+        random_selection += [list_[rand]]
+        
     return random_selection
 
 def dict_to_string(dictionary):
@@ -341,7 +344,7 @@ def dict_to_string(dictionary):
     d = dictionary
     dict_string = "{"
     for key in d:
-        dict_string += "\n\t'" + str(key) + "' : " + str(d[key]) + ","
+        dict_string += '\n\t"' + str(key) + '" : ' + str(d[key]) + ","
     dict_string = dict_string[:-1] # remove the final comma
     dict_string += "\n}"
     return dict_string
@@ -349,6 +352,20 @@ def dict_to_string(dictionary):
 def write_string_to_file(content, filename):
     with open("Resources\\" + filename, "w") as file:
         file.write(content)
+
+def get_random_moves(pokemon_name):
+    # Return a set of four unique moves for a given pokemon, based
+    # on its type(s)
+    pokemon_name = pokemon_name[0].upper() + pokemon_name[1:].lower()
+    pokemon_types = get_dict("pokemon_types.txt")
+    move_pool = generate_moveset(*pokemon_types[pokemon_name])
+    no_repeats = True
+    random_moveset = get_random_elements(move_pool, 4, no_repeats)
+
+    return random_moveset
+    
+def get_base_stats():
+    pass
 
 if __name__ == "__main__":
     #get_attackdex()
@@ -362,7 +379,9 @@ if __name__ == "__main__":
     #fix_dict("pokemon_movesets.txt")
     #movesets = get_dict("pokemon_movesets.txt")
     #pokemon_names = get_dict("numbered_pokemon.txt")
-    write_string_to_file(dict_to_string(get_pokemon_types_dict()), "pokemon_types.txt")
+    #write_string_to_file(dict_to_string(get_pokemon_types_dict()), "pokemon_types.txt")
     #html = get_html("http://www.serebii.net/pokedex-bw/bug.shtml", "neat")
     #print(html)
+    #print(get_random_moves("Gyarados")) 
+    
 
