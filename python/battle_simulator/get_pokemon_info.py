@@ -308,6 +308,7 @@ def generate_moveset(*types):
     physical_moves = get_dict("physical_moves.txt")
     special_moves = get_dict("special_moves.txt")
     #other_moves = get_dict("other_moves.txt")
+    # Can just combine movesets with m3 = {**m1, **m2}
 
     moves = []
     # Get all physical and special moves of the type(s)
@@ -353,14 +354,14 @@ def write_string_to_file(content, filename):
     with open("Resources\\" + filename, "w") as file:
         file.write(content)
 
-def get_random_moves(pokemon_name, moveset_exists):
+def get_random_moves(pokemon_name):
     # Return a set of four unique moves for a given pokemon, based
     # on its type(s); a new moveset is created if one doesn't already
     # exist
     pokemon_name = pokemon_name[0].upper() + pokemon_name[1:].lower()
-    
-    if moveset_exists:
-        movesets = get_dict("pokemon_movesets.txt")
+    movesets = get_dict("pokemon_movesets.txt")
+    moveset_exists = move_exists(pokemon_name, movesets)
+    if moveset_exists:       
         move_pool = movesets[pokemon_name]
     else:
         pokemon_types = get_dict("pokemon_types.txt")
@@ -396,6 +397,6 @@ if __name__ == "__main__":
     #html = get_html("http://www.serebii.net/pokedex-bw/bug.shtml", "neat")
     #print(html)
     moveset_exists = True
-    print(get_random_moves("Gyarados", moveset_exists)) 
+    print(get_random_moves("Gyarados")) 
     
 

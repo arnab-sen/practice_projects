@@ -1,19 +1,16 @@
 """
-Defines the pokemon class and battle logic between two pokemon
-
 TODO:
-- Change class functions to get stats from get_pokemon_info
-- Import two pokemon from a dict in a txt file
-- Begin with pokemon having two stats: HP and attack power
-- Pokemon have up to four moves each and take turns attacking
+- Import two fighters from a dict in a txt file
+- Begin with fighters having two stats: HP and attack power
+- Fighters have up to four moves each and take turns attacking
 - First one to 0 HP loses the battle
 """
-
 import ast
 import get_pokemon_info
 import random
 
-class Pokemon:
+class Fighter:
+    "Has HP and ATK"
 
     def __init__(self, name, HP, ATK):
         self._name = name
@@ -41,32 +38,37 @@ class Pokemon:
     name = property(get_name, set_name)
     HP = property(get_HP, set_HP)
     ATK = property(get_ATK, set_ATK)
-
+    
 def get_pokemon_names():
-    return get_pokemon_info.get_dict("numbered_pokemon.txt")
+    pokemon = get_pokemon_info.get_dict("numbered_pokemon.txt")
+    return pokemon
 
-def calculate_damage(attacker, defender):
-    placeholder_damage = 50
-    return placeholder_damage
+def get_battle_data():
+    with open("Resources\\fighters.txt") as file:
+        names_dict = ast.literal_eval(file.read())
+        names = [names_dict["fighter1"], names_dict["fighter2"]]
+    return names
 
 def initialise_battle(names, HPs, ATKs):
-    pokemon1 = Pokemon(names[0], HPs[0], ATKs[0])
-    pokemon2 = Pokemon(names[1], HPs[1], ATKs[1])
-    #print(pokemon1.name, pokemon1.HP, pokemon1.ATK)
-    #print(pokemon2.name, pokemon2.HP, pokemon2.ATK)
-    pokemon = [pokemon1, pokemon2]
-    return pokemon
+    fighter1 = Fighter(names[0], HPs[0], ATKs[0])
+    fighter2 = Fighter(names[1], HPs[1], ATKs[1])
+    #print(fighter1.name, fighter1.HP, fighter1.ATK)
+    #print(fighter2.name, fighter2.HP, fighter2.ATK)
+    fighters = [fighter1, fighter2]
+    return fighters
 
 def attack(attacker, defender):
     a = attacker
     d = defender
-    damage = calculate_damage(a, d)
-    #print(a.name + " attacks " + d.name)
+    print(a.name + " attacks " + d.name)
     print(d.name + "'s HP fell from " + str(d.HP), end = "")
     d.HP = d.HP - a.ATK
     print(" to " + str(d.HP))
 
-if __name__ == "__main__":
+def battle(fighters):
+    pass
+
+def main():
     pokemon = get_pokemon_names()
     #names = get_battle_data()
     nums = [random.randrange(1, 650), random.randrange(1, 650)]
@@ -75,9 +77,11 @@ if __name__ == "__main__":
     names = [pokemon[nums[0]], pokemon[nums[1]]]
     HPs = [100, 150]
     ATKs = [50, 25]
-    pokemon = initialise_battle(names, HPs, ATKs)
-    f1 = pokemon[0]
-    f2 = pokemon[1]
+    fighters = initialise_battle(names, HPs, ATKs)
+    f1 = fighters[0]
+    f2 = fighters[1]
     print(f1.name + "'s HP: " + str(f1.HP))
     attack(f1, f2)
     attack(f2, f1)
+
+main()    

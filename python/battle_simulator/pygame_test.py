@@ -1,5 +1,5 @@
 import sys, pygame, time, random
-import get_pokemon_info
+import get_pokemon_info, battle
 # Get a random pokemon with random moves selected from that
 # Pokemon's moveset (will need multiple dicts for pokemon
 # and their movesets --> use webscraping from serebii
@@ -50,7 +50,7 @@ if len(pokemon_2) == 1: pokemon_2 = "00" + pokemon_2
 elif len(pokemon_2) == 2: pokemon_2 = "0" + pokemon_2
 #pokemon_2 = "466"
 pokemon_1 = "158" # Totodile
-pokemon_2 = "009" # Charizard
+pokemon_2 = "006" # Charizard
 pokemon_position = (420, 50)
 if pokemon_1 == "632": pokemon_position = (380, 20)
 # Test pokemon
@@ -72,8 +72,7 @@ all_moves = {**physical_moves, **special_moves}
 movesets = get_pokemon_info.get_dict("pokemon_movesets.txt")
 poke_1 = "Totodile"
 poke_2 = "Charizard"
-move_exists = get_pokemon_info.move_exists(poke_1, movesets)
-moves = get_pokemon_info.get_random_moves(poke_1, move_exists) 
+moves = get_pokemon_info.get_random_moves(poke_1) 
 
 # Note that positions are in (width, height) or (x, y) rather than (row, col)
 move_1_surface = myfont.render(moves[0], anti_alias, text_colour)
