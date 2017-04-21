@@ -68,9 +68,18 @@ def show_attack(attacker, defender, current_move):
     battle_text_message = []
     battle_text = []
     battle.attack(attacker, defender, current_move)
-    battle_text_message += [attacker.name + " used " + current_move + "!"]
-    battle_text_message += [defender.name + "'s HP fell from " + str(temp_HP)]
-    battle_text_message += ["to " + str(defender.stats["HP"])]
+    if temp_HP != defender.stats["HP"]:
+        battle_text_message += [attacker.name + " used " +\
+                            current_move + "!"]
+        battle_text_message += [defender.name + "'s HP fell from " +\
+                                str(temp_HP)]
+        battle_text_message += ["to " + str(defender.stats["HP"])]
+    else:
+        battle_text_message = [""]
+        battle_text_message += [attacker.name + " used " +\
+                            current_move]
+        battle_text_message[1] += "... but it had no effect!"
+        battle_text_message += [""]
         
     #print(attacker.name + " used " + current_move + "!")
     #print(defender.name + "'s HP fell from " + \
@@ -136,8 +145,9 @@ if __name__ == "__main__":
     quadrants = initialise_display()
 
     # DEBUG printing:
-    print(pokemon[0].stats)
-    print(pokemon[1].stats)
+    print(pokemon[0].name, "'s stats:", pokemon[0].stats)
+    print()
+    print(pokemon[1].name, "'s stats:", pokemon[1].stats)
     p0 = pokemon[0]
     p1 = pokemon[1]
     game_state = "show_moves"
@@ -194,7 +204,6 @@ if __name__ == "__main__":
                         else:
                             game_state = "show_moves"
                 elif game_state == "game_over":
-                    print("Battle over!")
                     game_state = "exit_game"
             if game_state == "exit_game":
                 pygame.display.quit()
