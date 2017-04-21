@@ -44,12 +44,12 @@ def create_pokemon(pokemon_numbers, moves):
     numbered_pokemon = get_pokemon_info.get_dict("numbered_pokemon.txt")
     # TODO:
     # - Get the following placeholder stats from a dict instead
-    placeholder_hp = 150
-    placeholder_atk = 50
     i = 0
+    all_stats = get_pokemon_info.get_dict("pokemon_stats.txt")
+    
     for num in pokemon_numbers:
         name = numbered_pokemon[get_pokemon_info.pokemon_number(num)]
-        pokemon += [battle.Pokemon(name, placeholder_hp, placeholder_atk, moves[i])]
+        pokemon += [battle.Pokemon(name, moves[i], all_stats[name])]
         i += 1
 
     return pokemon
@@ -66,11 +66,11 @@ def show_attack(attacker, defender, current_move):
     battle_over = False
     print(attacker.name + " used " + current_move + "!")
     print(defender.name + "'s HP fell from " + \
-          str(defender.HP), end = "")
-    battle.attack(attacker, defender)
-    print(" to " + str(defender.HP))
+          str(defender.stats["HP"]), end = "")
+    battle.attack(attacker, defender, current_move)
+    print(" to " + str(defender.stats["HP"]))
     print()
-    if defender.HP == 0:
+    if defender.stats["HP"] == 0:
         print(defender.name + " fainted...\n" + attacker.name + " wins!")
         battle_over = True
 
@@ -124,6 +124,10 @@ if __name__ == "__main__":
         
     quadrants = initialise_display()
 
+    # DEBUG printing:
+    print(pokemon[0].stats)
+    print(pokemon[1].stats)
+
     while 1:
         #time.sleep(0.01) # To slow down the animation
         for event in pygame.event.get():
@@ -136,7 +140,8 @@ if __name__ == "__main__":
             elif event.type == pygame.MOUSEBUTTONUP:
                 mouse_position = pygame.mouse.get_pos()
                 i = mouse_in_quadrant(mouse_position, quadrants)
-                if i > -1 and pokemon[0].HP * pokemon[1].HP != 0:
+                if i > -1 and pokemon[0].stats["HP"] * \
+                              pokemon[1].stats["HP"] != 0:
                     current_move = moves[i]
                     if not show_attack(pokemon[0], pokemon[1], current_move):
                         opponent_move = opponent_moves[random.randrange(3)]
@@ -157,7 +162,8 @@ if __name__ == "__main__":
         screen.blit(move_surfaces[2],(quadrants[2][0] + 30, quadrants[2][1] + 10))
         screen.blit(move_surfaces[3],(quadrants[3][0] + 10, quadrants[3][1] + 10))
 
-        right_box_message = "HP: " + str(pokemon[0].HP) + "/" + str(pokemon[0].max_HP)        
+        right_box_message = "HP: " + str(pokemon[0].stats["HP"]) + "/" + \
+                            str(pokemon[0].original_stats["HP"])        
         right_box = myfont.render(right_box_message , anti_alias, text_colour)
         screen.blit(right_box,(525, 395))
         

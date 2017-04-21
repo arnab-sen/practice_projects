@@ -358,7 +358,6 @@ def get_random_moves(pokemon_name):
     # Return a set of four unique moves for a given pokemon, based
     # on its type(s); a new moveset is created if one doesn't already
     # exist
-    pokemon_name = pokemon_name[0].upper() + pokemon_name[1:].lower()
     all_moves = get_dict("all_moves.txt")
     movesets = get_dict("pokemon_movesets.txt")
     moveset_exists = move_exists(pokemon_name, movesets)
@@ -373,7 +372,7 @@ def get_random_moves(pokemon_name):
         pokemon_types = get_dict("pokemon_types.txt")
         move_pool = generate_moveset(*pokemon_types[pokemon_name])
 
-    print(move_pool)
+    #print(move_pool)
         
     no_repeats = True
     number_of_moves = 4
@@ -452,5 +451,5 @@ if __name__ == "__main__":
     #    if numbered_pokemon[num] not in pokemon_stats:
     #        #print(numbered_pokemon[num])
     #        pass
-    
+    pass
 
