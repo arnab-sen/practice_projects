@@ -65,10 +65,11 @@ def show_attack(attacker, defender, current_move):
     d = defender
     battle_over = False
     print(attacker.name + " used " + current_move + "!")
-    print(defender.name + "'s HP fell from " + \
-          str(defender.stats["HP"]), end = "")
+    temp_HP = defender.stats["HP"]
     battle.attack(attacker, defender, current_move)
-    print(" to " + str(defender.stats["HP"]))
+    print(defender.name + "'s HP fell from " + \
+          str(temp_HP) + \
+          " to " + str(defender.stats["HP"]))
     print()
     if defender.stats["HP"] == 0:
         print(defender.name + " fainted...\n" + attacker.name + " wins!")
@@ -95,7 +96,7 @@ if __name__ == "__main__":
 
     number_of_pokemon = 2
     pokemon_numbers = get_random_pokemon(number_of_pokemon)
-    #pokemon_numbers[0] = "173"
+    pokemon_numbers[0] = "006"
     pokemon_names = get_pokemon_names(pokemon_numbers)
     pokemon_1 = pokemon_numbers[0]
     pokemon_2 = pokemon_numbers[1]
