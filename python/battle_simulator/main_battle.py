@@ -39,16 +39,18 @@ def get_random_pokemon(number_of_pokemon):
 
     return pokemon_numbers 
 
-def create_pokemon(pokemon_numbers):
+def create_pokemon(pokemon_numbers, moves):
     pokemon = []
     numbered_pokemon = get_pokemon_info.get_dict("numbered_pokemon.txt")
     # TODO:
     # - Get the following placeholder stats from a dict instead
     placeholder_hp = 150
     placeholder_atk = 50
+    i = 0
     for num in pokemon_numbers:
         name = numbered_pokemon[get_pokemon_info.pokemon_number(num)]
-        pokemon += [battle.Pokemon(name, placeholder_hp, placeholder_atk)]
+        pokemon += [battle.Pokemon(name, placeholder_hp, placeholder_atk, moves[i])]
+        i += 1
 
     return pokemon
 
@@ -57,6 +59,22 @@ def mouse_in_quadrant(mouse_position, move_quadrants):
         if move_quadrants[i].collidepoint(mouse_position):
             return i
     return -1
+
+def show_attack(attacker, defender, current_move):
+    a = attacker
+    d = defender
+    battle_over = False
+    print(attacker.name + " used " + current_move + "!")
+    print(defender.name + "'s HP fell from " + \
+          str(defender.HP), end = "")
+    battle.attack(attacker, defender)
+    print(" to " + str(defender.HP))
+    print()
+    if defender.HP == 0:
+        print(defender.name + " fainted...\n" + attacker.name + " wins!")
+        battle_over = True
+
+    return battle_over
 
 if __name__ == "__main__":
     pygame.init()
@@ -77,11 +95,14 @@ if __name__ == "__main__":
 
     number_of_pokemon = 2
     pokemon_numbers = get_random_pokemon(number_of_pokemon)
+    #pokemon_numbers[0] = "173"
     pokemon_names = get_pokemon_names(pokemon_numbers)
     pokemon_1 = pokemon_numbers[0]
     pokemon_2 = pokemon_numbers[1]
     pokemon_position = (420, 50)
-    pokemon = create_pokemon(pokemon_numbers)
+    moves = get_moves(pokemon_names[0])
+    opponent_moves = get_moves(pokemon_names[1])
+    pokemon = create_pokemon(pokemon_numbers, [moves, opponent_moves])
     if pokemon_1 == "632": pokemon_position = (380, 20)
     # Test pokemon
     # Original size: 96 x 96, scaled size = 288, 288
@@ -96,12 +117,11 @@ if __name__ == "__main__":
     # Positions are in (width, height) or (x, y) rather than (row, col)
     move_surfaces = []
     # Get user's pokemon's moveset
-    print(pokemon_names)
-    moves = get_moves(pokemon_names[0])
+    #print(pokemon_names)
+    
     for move in moves:
         move_surfaces += [get_move_surface(move, anti_alias, text_colour)]
         
-    move_power = myfont.render('Move Power', anti_alias, text_colour)
     quadrants = initialise_display()
 
     while 1:
@@ -116,10 +136,11 @@ if __name__ == "__main__":
             elif event.type == pygame.MOUSEBUTTONUP:
                 mouse_position = pygame.mouse.get_pos()
                 i = mouse_in_quadrant(mouse_position, quadrants)
-                if i > -1:
+                if i > -1 and pokemon[0].HP * pokemon[1].HP != 0:
                     current_move = moves[i]
-                    print(pokemon_names[0] + " used " + current_move + "!")
-                    battle.attack(pokemon[0], pokemon[1])
+                    if not show_attack(pokemon[0], pokemon[1], current_move):
+                        opponent_move = opponent_moves[random.randrange(3)]
+                        show_attack(pokemon[1], pokemon[0], opponent_move)
 
         screen.fill(black)
         screen.blit(bg, (0, 0))
@@ -135,7 +156,10 @@ if __name__ == "__main__":
         screen.blit(move_surfaces[1],(quadrants[1][0] + 10, quadrants[1][1] + 15))
         screen.blit(move_surfaces[2],(quadrants[2][0] + 30, quadrants[2][1] + 10))
         screen.blit(move_surfaces[3],(quadrants[3][0] + 10, quadrants[3][1] + 10))
-        screen.blit(move_power,(525, 395))
+
+        right_box_message = "HP: " + str(pokemon[0].HP) + "/" + str(pokemon[0].max_HP)        
+        right_box = myfont.render(right_box_message , anti_alias, text_colour)
+        screen.blit(right_box,(525, 395))
         
         
         # update whole screen (use display.update(rectangle) to update

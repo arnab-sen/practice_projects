@@ -15,10 +15,12 @@ import random
 
 class Pokemon:
 
-    def __init__(self, name, HP, ATK):
+    def __init__(self, name, HP, ATK, moves):
         self._name = name
+        self._max_HP = HP
         self._HP = HP
         self._ATK = ATK
+        self._moves = moves
 
     def set_name(self, value):
         self._name = value
@@ -29,6 +31,9 @@ class Pokemon:
     def set_HP(self, value):
         self._HP = value
 
+    def get_max_HP(self):
+        return self._max_HP
+    
     def get_HP(self):
         return self._HP
 
@@ -38,9 +43,18 @@ class Pokemon:
     def get_ATK(self):
         return self._ATK
 
+    def set_moves(self, value):
+        self._moves = values
+
+    def get_moves(self, index):
+        return self._moves[index]
+    
+
     name = property(get_name, set_name)
+    max_HP = property(get_max_HP, None)
     HP = property(get_HP, set_HP)
     ATK = property(get_ATK, set_ATK)
+    moves = property(get_moves, set_moves)
 
 def get_pokemon_names():
     return get_pokemon_info.get_dict("numbered_pokemon.txt")
@@ -62,9 +76,10 @@ def attack(attacker, defender):
     d = defender
     damage = calculate_damage(a, d)
     #print(a.name + " attacks " + d.name)
-    print(d.name + "'s HP fell from " + str(d.HP), end = "")
+    #print(d.name + "'s HP fell from " + str(d.HP), end = "")
     d.HP = d.HP - a.ATK
-    print(" to " + str(d.HP))
+    if d.HP < 0: d.HP = 0
+    #print(" to " + str(d.HP))
 
 if __name__ == "__main__":
     pokemon = get_pokemon_names()
@@ -78,6 +93,6 @@ if __name__ == "__main__":
     pokemon = initialise_battle(names, HPs, ATKs)
     f1 = pokemon[0]
     f2 = pokemon[1]
-    print(f1.name + "'s HP: " + str(f1.HP))
+    print(f1.name + "'s HP: " + str(f1.max_HP))
     attack(f1, f2)
     attack(f2, f1)

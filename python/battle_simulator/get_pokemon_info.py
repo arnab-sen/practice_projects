@@ -359,13 +359,21 @@ def get_random_moves(pokemon_name):
     # on its type(s); a new moveset is created if one doesn't already
     # exist
     pokemon_name = pokemon_name[0].upper() + pokemon_name[1:].lower()
+    all_moves = get_dict("all_moves.txt")
     movesets = get_dict("pokemon_movesets.txt")
     moveset_exists = move_exists(pokemon_name, movesets)
     if moveset_exists:       
         move_pool = movesets[pokemon_name]
+        # Cross reference moves with all_moves and remove invalid moves
+        temp_pool = []
+        for i in move_pool:
+            if i in all_moves: temp_pool += [i]
+        move_pool = temp_pool
     else:
         pokemon_types = get_dict("pokemon_types.txt")
         move_pool = generate_moveset(*pokemon_types[pokemon_name])
+
+    print(move_pool)
         
     no_repeats = True
     number_of_moves = 4
@@ -379,8 +387,47 @@ def move_exists(key, movesets):
     else: return True
   
 def get_base_stats():
-    pass
-
+    url = "http://bulbapedia.bulbagarden.net/wiki" + \
+          "/List_of_Pok%C3%A9mon_by_base_stats_(Generation_II-V)"
+    # STATS: Pokemon : [HP, ATT, DEF, SP.ATK, SP.DEF, SPEED]
+    page_text = get_html(url, "text").split()
+    # Since the list is ordered by national dex number, I can just
+    # iterate using my numbered_pokemon dict
+    numbered_pokemon = get_dict("numbered_pokemon.txt")
+    pokemon_stats = {}
+    # Find the first pokemon
+    for i in range(len(page_text)):
+        if page_text[i] == numbered_pokemon["001"]:
+            start = i
+            break
+    page_list = page_text[start:]
+    #for i in page_list: print(i)
+    for i in range(1, 650):
+        num = pokemon_number(i)
+        for j in range(len(page_list)):
+            if numbered_pokemon[num] in page_list[j]:
+                stats = []
+                for k in range(1, 7):
+                    try:
+                        stats += [int(page_list[j + k])]
+                    except:
+                        #print(page_list[j : j + 7])
+                        if page_list[j] != "Unown": 
+                            stats += [int(page_list[j + k + 2])]
+                if numbered_pokemon[num] == "Unown":
+                    pokemon_stats["Unown"] = [48, 72, 48, 72, 48, 48]
+                else: pokemon_stats[numbered_pokemon[num]] = stats
+                
+    #Other special cases:
+    pokemon_stats["Nidoran-F"] = [55, 47, 52, 40, 40, 41]
+    pokemon_stats["Nidoran-M"] = [46, 57, 40, 40, 40, 50]
+    pokemon_stats["Mr.Mime"] = [40, 45, 65, 100, 120, 90]
+    pokemon_stats["Porygon 2"] = [85, 80, 90, 105, 95, 60]
+    pokemon_stats["Ho-oh"] = [106, 130, 90, 110, 154, 90]
+    pokemon_stats["Mime Jr."] = [20, 25, 45, 70, 90, 60]
+   
+    write_string_to_file(dict_to_string(pokemon_stats), "pokemon_stats.txt")
+                
 if __name__ == "__main__":
     #get_attackdex()
     #get_numbered_pokemon()
@@ -396,7 +443,14 @@ if __name__ == "__main__":
     #write_string_to_file(dict_to_string(get_pokemon_types_dict()), "pokemon_types.txt")
     #html = get_html("http://www.serebii.net/pokedex-bw/bug.shtml", "neat")
     #print(html)
-    moveset_exists = True
-    print(get_random_moves("Gyarados")) 
+    #moveset_exists = True
+    #print(get_random_moves("Gyarados"))
+    #get_base_stats()
+    #pokemon_stats = get_dict("pokemon_stats.txt")
+    #numbered_pokemon = get_dict("numbered_pokemon.txt")
+    #for num in numbered_pokemon:
+    #    if numbered_pokemon[num] not in pokemon_stats:
+    #        #print(numbered_pokemon[num])
+    #        pass
     
 
