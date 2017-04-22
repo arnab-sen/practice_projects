@@ -122,6 +122,8 @@ if __name__ == "__main__":
     moves = get_moves(pokemon_names[0])
     opponent_moves = get_moves(pokemon_names[1])
     pokemon = create_pokemon(pokemon_numbers, [moves, opponent_moves])
+    p0 = pokemon[0]
+    p1 = pokemon[1]
     if pokemon_1 == "632": pokemon_position = (380, 20)
     # Test pokemon
     # Original size: 96 x 96, scaled size = 288, 288
@@ -133,6 +135,30 @@ if __name__ == "__main__":
     bg = pygame.image.load("Resources\\battle_screen_with_moves_blank.png")
     moves_bar = pygame.image.load("Resources\\moves_bar.png")
     text_bar = pygame.image.load("Resources\\text_bar.png")
+    hp_bar_1 = pygame.image.load("Resources\\hp_bar_01.png")
+    hp_bar_2 = pygame.image.load("Resources\\hp_bar_02.png")
+    green_hp_1 = pygame.image.load("Resources\\hp_bars\\green.png")
+    green_hp_2 = pygame.image.load("Resources\\hp_bars\\green.png")
+    yellow_hp_1 = pygame.image.load("Resources\\hp_bars\\yellow.png")
+    yellow_hp_2 = pygame.image.load("Resources\\hp_bars\\yellow.png")
+    red_hp_1 = pygame.image.load("Resources\\hp_bars\\red.png")
+    red_hp_2 = pygame.image.load("Resources\\hp_bars\\red.png")
+    empty_hp_1 = pygame.image.load("Resources\\hp_bars\\empty.png")
+    empty_hp_2 = pygame.image.load("Resources\\hp_bars\\empty.png")
+    hp_bars_pos = [(380, 225), (30, 43)]
+    hp_colour_pos = [(hp_bars_pos[1][0] + 95, hp_bars_pos[1][0] + 61)]
+    hp_colour_pos += [(hp_bars_pos[1][0] + 459, hp_bars_pos[1][0] + 242)]
+    hp_max_colour_width = 144
+    hp_widths = [144, 144]
+    hp_percent = [p0.stats["HP"] / p0.original_stats["HP"]]
+    hp_percent += [p1.stats["HP"] / p1.original_stats["HP"]]
+    p0_hp_bar = {"colour" : "green", "width" : 144 * hp_percent[0]}
+    p1_hp_bar = {"colour" : "green", "width" : 144 * hp_percent[1]}
+    hp_bars = [{
+        "green" : green_hp_1, "yellow" : yellow_hp_1,
+        "red" : red_hp_1, "empty" : empty_hp_1}]
+    hp_bars += [{"green" : green_hp_2, "yellow" : yellow_hp_2,
+                 "red" : red_hp_2, "empty" : empty_hp_2}]
 
     # Positions are in (width, height) or (x, y) rather than (row, col)
     move_surfaces = []
@@ -145,11 +171,9 @@ if __name__ == "__main__":
     quadrants = initialise_display()
 
     # DEBUG printing:
-    print(pokemon[0].name, "'s stats:", pokemon[0].stats)
-    print()
-    print(pokemon[1].name, "'s stats:", pokemon[1].stats)
-    p0 = pokemon[0]
-    p1 = pokemon[1]
+    #print(pokemon[0].name, "'s stats:", pokemon[0].stats)
+    #print()
+    #print(pokemon[1].name, "'s stats:", pokemon[1].stats)
     game_state = "show_moves"
     game_over = False
     my_turn = True
@@ -211,9 +235,42 @@ if __name__ == "__main__":
                 sys.exit()
                     
         screen.fill(black)
+        # Display background, pokemon, hp bars, and moves/battle text:
         screen.blit(bg, (0, 0))
         screen.blit(f1, (60, 150))
         screen.blit(f2, pokemon_position)
+        screen.blit(hp_bar_1, (380, 225))
+        screen.blit(hp_bar_2, (30, 43))
+        
+        # Change hp bars:
+        if p0.stats["HP"] * p1.stats["HP"] != 0:
+            hp_percent = [p0.stats["HP"] / p0.original_stats["HP"]]
+            hp_percent += [p1.stats["HP"] / p1.original_stats["HP"]]
+            #print(hp_percent)
+            new_widths = [144 * hp_percent[0], 144 * hp_percent[1]]
+            #print(hp_percent[0], hp_widths[0])
+            hp_1 = hp_bars[0][p0_hp_bar["colour"]]
+            hp_2 = hp_bars[1][p1_hp_bar["colour"]]
+            hp_1 = pygame.transform.scale(hp_1, (round(new_widths[1]), 6))              
+            hp_2 = pygame.transform.scale(hp_2, (round(new_widths[0]), 6))
+            hp_bars[0][p0_hp_bar["colour"]] = hp_1
+            hp_bars[1][p1_hp_bar["colour"]] = hp_2
+        elif game_state == "game_over" and p0.stats["HP"] == 0:
+            p1_hp_bar["colour"] = "empty"
+            hp_bars[0][p1_hp_bar["colour"]]
+        elif game_state == "game_over" and p1.stats["HP"] == 0: 
+            p0_hp_bar["colour"] = "empty"
+            hp_bars[1][p0_hp_bar["colour"]]
+    
+        # Green/red/yellow/empty hp:
+        #screen.blit(red_hp, (hp_bars_pos[0][0] + 95, hp_bars_pos[0][0] + 61))
+        screen.blit(hp_bars[0][p0_hp_bar["colour"]], hp_colour_pos[0])
+        screen.blit(hp_bars[1][p1_hp_bar["colour"]], hp_colour_pos[1])
+
+        # HP animation:
+        #time.sleep(0.01)
+        
+        
         if game_state == "show_moves":
             screen.blit(moves_bar, (0, 337))
             screen.blit(move_surfaces[0],(quadrants[0][0] + 30, quadrants[0][1] + 15))
