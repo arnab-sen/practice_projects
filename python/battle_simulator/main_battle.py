@@ -69,11 +69,8 @@ def show_attack(attacker, defender, current_move):
     battle_text = []
     battle.attack(attacker, defender, current_move)
     if temp_HP != defender.stats["HP"]:
-        battle_text_message += [attacker.name + " used " +\
-                            current_move + "!"]
-        battle_text_message += [defender.name + "'s HP fell from " +\
-                                str(temp_HP)]
-        battle_text_message += ["to " + str(defender.stats["HP"])]
+        battle_text_message += ["", attacker.name + " used " +\
+                            current_move + "!", ""]
     else:
         battle_text_message = [""]
         battle_text_message += [attacker.name + " used " +\
@@ -159,6 +156,7 @@ if __name__ == "__main__":
         "red" : red_hp_1, "empty" : empty_hp_1}]
     hp_bars += [{"green" : green_hp_2, "yellow" : yellow_hp_2,
                  "red" : red_hp_2, "empty" : empty_hp_2}]
+    prev_hp = [p1.original_stats["HP"], p0.original_stats["HP"]]
 
     # Positions are in (width, height) or (x, y) rather than (row, col)
     move_surfaces = []
@@ -243,53 +241,48 @@ if __name__ == "__main__":
         screen.blit(hp_bar_2, (30, 43))
         
         # Change hp bars:
-        if p0.stats["HP"] * p1.stats["HP"] != 0:
-            hp_percent = [p0.stats["HP"] / p0.original_stats["HP"]]
-            hp_percent += [p1.stats["HP"] / p1.original_stats["HP"]]
-            if hp_percent[1] > 0.5:
-                p0_hp_bar["colour"] = "green"
-            elif hp_percent[1] > 0.2 :
-                p0_hp_bar["colour"] = "yellow"
-            elif hp_percent[1] <= 0.2:
-                p0_hp_bar["colour"] = "red"
-            if hp_percent[0] > 0.5:
-                p1_hp_bar["colour"] = "green"
-            elif hp_percent[0] > 0.2:
-                p1_hp_bar["colour"] = "yellow"
-            elif hp_percent[0] <= 0.2:
-                p1_hp_bar["colour"] = "red"
-            #print(hp_percent)
-            new_widths = [144 * hp_percent[0], 144 * hp_percent[1]]
-            #print(hp_percent[0], hp_widths[0])
-            hp_1 = hp_bars[0][p0_hp_bar["colour"]]
-            hp_2 = hp_bars[1][p1_hp_bar["colour"]]
-            hp_1 = pygame.transform.scale(hp_1, (round(new_widths[1]), 6))              
-            hp_2 = pygame.transform.scale(hp_2, (round(new_widths[0]), 6))
-            hp_bars[0][p0_hp_bar["colour"]] = hp_1
-            hp_bars[1][p1_hp_bar["colour"]] = hp_2
-        elif game_state == "game_over" and p0.stats["HP"] == 0:
-            p1_hp_bar["colour"] = "empty"
-            hp_bars[0][p1_hp_bar["colour"]]
-        elif game_state == "game_over" and p1.stats["HP"] == 0: 
+        #if p0.stats["HP"] * p1.stats["HP"] != 0:
+        hp_percent = [p0.stats["HP"] / p0.original_stats["HP"]]
+        hp_percent += [p1.stats["HP"] / p1.original_stats["HP"]]
+        if hp_percent[1] > 0.5:
+            p0_hp_bar["colour"] = "green"
+        elif hp_percent[1] > 0.2 :
+            p0_hp_bar["colour"] = "yellow"
+        elif hp_percent[1] <= 0.2:
+            p0_hp_bar["colour"] = "red"
+        elif hp_percent[1] == 0:
             p0_hp_bar["colour"] = "empty"
-            hp_bars[1][p0_hp_bar["colour"]]
+        if hp_percent[0] > 0.5:
+            p1_hp_bar["colour"] = "green"
+        elif hp_percent[0] > 0.2:
+            p1_hp_bar["colour"] = "yellow"
+        elif hp_percent[0] <= 0.2:
+            p1_hp_bar["colour"] = "red"
+        elif hp_percent[0] == 0:
+            p1_hp_bar["colour"] = "empty"
+        #print(hp_percent)
+        new_widths = [144 * hp_percent[0], 144 * hp_percent[1]]
+        #print(hp_percent[0], hp_widths[0])
+        hp_1 = hp_bars[0][p0_hp_bar["colour"]]
+        hp_2 = hp_bars[1][p1_hp_bar["colour"]]
+        hp_1 = pygame.transform.scale(hp_1, (round(new_widths[1]), 6))              
+        hp_2 = pygame.transform.scale(hp_2, (round(new_widths[0]), 6))
+        hp_bars[0][p0_hp_bar["colour"]] = hp_1
+        hp_bars[1][p1_hp_bar["colour"]] = hp_2
     
         # Green/red/yellow/empty hp:
         #screen.blit(red_hp, (hp_bars_pos[0][0] + 95, hp_bars_pos[0][0] + 61))
         screen.blit(hp_bars[0][p0_hp_bar["colour"]], hp_colour_pos[0])
         screen.blit(hp_bars[1][p1_hp_bar["colour"]], hp_colour_pos[1])
-        hp_text_message = [str(pokemon[0].stats["HP"]) + "/" + \
+        hp_text_message = [str(prev_hp[1]) + "/" + \
                             str(pokemon[0].original_stats["HP"])]
-        hp_text_message += [str(pokemon[1].stats["HP"]) + "/" + \
+        hp_text_message += [str(prev_hp[0]) + "/" + \
                             str(pokemon[1].original_stats["HP"])]
+        prev_hp = [pokemon[1].stats["HP"], pokemon[0].stats["HP"]]
         hp_text = [myfont.render(hp_text_message[0] , anti_alias, text_colour)]
         hp_text += [myfont.render(hp_text_message[1] , anti_alias, text_colour)]
         screen.blit(hp_text[1], (hp_colour_pos[0][0] + 80, hp_colour_pos[0][1] + 15))
-        screen.blit(hp_text[0], (hp_colour_pos[1][0] + 80, hp_colour_pos[1][1] + 15))
-
-        # HP animation:
-        #time.sleep(0.01)
-        
+        screen.blit(hp_text[0], (hp_colour_pos[1][0] + 80, hp_colour_pos[1][1] + 15))      
         
         if game_state == "show_moves":
             screen.blit(moves_bar, (0, 337))
