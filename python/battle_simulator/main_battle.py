@@ -246,6 +246,18 @@ if __name__ == "__main__":
         if p0.stats["HP"] * p1.stats["HP"] != 0:
             hp_percent = [p0.stats["HP"] / p0.original_stats["HP"]]
             hp_percent += [p1.stats["HP"] / p1.original_stats["HP"]]
+            if hp_percent[1] > 0.5:
+                p0_hp_bar["colour"] = "green"
+            elif hp_percent[1] > 0.2 :
+                p0_hp_bar["colour"] = "yellow"
+            elif hp_percent[1] <= 0.2:
+                p0_hp_bar["colour"] = "red"
+            if hp_percent[0] > 0.5:
+                p1_hp_bar["colour"] = "green"
+            elif hp_percent[0] > 0.2:
+                p1_hp_bar["colour"] = "yellow"
+            elif hp_percent[0] <= 0.2:
+                p1_hp_bar["colour"] = "red"
             #print(hp_percent)
             new_widths = [144 * hp_percent[0], 144 * hp_percent[1]]
             #print(hp_percent[0], hp_widths[0])
@@ -266,6 +278,14 @@ if __name__ == "__main__":
         #screen.blit(red_hp, (hp_bars_pos[0][0] + 95, hp_bars_pos[0][0] + 61))
         screen.blit(hp_bars[0][p0_hp_bar["colour"]], hp_colour_pos[0])
         screen.blit(hp_bars[1][p1_hp_bar["colour"]], hp_colour_pos[1])
+        hp_text_message = [str(pokemon[0].stats["HP"]) + "/" + \
+                            str(pokemon[0].original_stats["HP"])]
+        hp_text_message += [str(pokemon[1].stats["HP"]) + "/" + \
+                            str(pokemon[1].original_stats["HP"])]
+        hp_text = [myfont.render(hp_text_message[0] , anti_alias, text_colour)]
+        hp_text += [myfont.render(hp_text_message[1] , anti_alias, text_colour)]
+        screen.blit(hp_text[1], (hp_colour_pos[0][0] + 80, hp_colour_pos[0][1] + 15))
+        screen.blit(hp_text[0], (hp_colour_pos[1][0] + 80, hp_colour_pos[1][1] + 15))
 
         # HP animation:
         #time.sleep(0.01)
@@ -277,10 +297,6 @@ if __name__ == "__main__":
             screen.blit(move_surfaces[1],(quadrants[1][0] + 10, quadrants[1][1] + 15))
             screen.blit(move_surfaces[2],(quadrants[2][0] + 30, quadrants[2][1] + 10))
             screen.blit(move_surfaces[3],(quadrants[3][0] + 10, quadrants[3][1] + 10))
-            right_box_message = "HP: " + str(pokemon[0].stats["HP"]) + "/" + \
-                                str(pokemon[0].original_stats["HP"])        
-            right_box = myfont.render(right_box_message , anti_alias, text_colour)
-            screen.blit(right_box,(525, 395))
         elif game_state == "battle_text_1":
             screen.blit(text_bar, (0, 337))
             screen.blit(battle_text_1[0], (25, 360))
