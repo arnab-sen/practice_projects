@@ -8,6 +8,7 @@ import urllib.request
 import os
 import ast
 import datetime
+import time
 from bs4 import BeautifulSoup
 
 def get_user_info():
@@ -35,7 +36,9 @@ def write_string_to_file(content, filename, directory):
     # exist, then save a text file to that folder
     if not os.path.exists(directory):
         os.makedirs(directory)
-    with open(directory + "\\" + filename, "w") as file:
+    # "a" rather than "w" so the txt file is added to
+    # rather than overwritten
+    with open(directory + "\\" + filename, "a") as file:
         file.write(content)
         
 def get_skill_rating(html):
@@ -62,16 +65,49 @@ def get_date_and_time(country, city):
         if "h1" in i: time = get_data_between_tags(i)
         if "ctdat" in i: date = get_data_between_tags(i)
         
-    return time + " " + date
+    return time, date
     
 def main():
-    url = get_user_info()
-    page_html = get_html(url, "messy")
-    skill_rating = get_skill_rating(page_html)
     country = input("Enter country: ")
     city = input("Enter city: ")
-    time = get_date_and_time(country, city)
-    print(time + "\n" + "Skill Rating: " + str(skill_rating))
+    current_time, date = get_date_and_time(country, city)
+    filename = "sr_log.txt"
+    directory = "OW SR Logs"
+    write_string_to_file("--- " + date + " ---" + "\n\n", filename, directory)
+    url = get_user_info()
+    clock_cycle = 1 # seconds to wait
+    page_html = get_html(url, "messy")
+    skill_rating = get_skill_rating(page_html)
+    previous_sr = skill_rating
+    current_sr = previous_sr
+    starting_sr_message = "Starting SR: " + str(current_sr) + "\n"
+    write_string_to_file(starting_sr_message, filename, directory)
+
+    #test_sr = []
+    while(1):
+    #for sr in test_sr:
+        print("Checking...", end = "")
+        page_html = get_html(url, "messy")
+        skill_rating = get_skill_rating(page_html)
+        #skill_rating = sr
+        if skill_rating != previous_sr:
+            current_sr = skill_rating
+            sr_difference = current_sr - previous_sr
+            if sr_difference < 0:
+                diff_text = " (" + str(sr_difference) + ")"
+            else:
+                diff_text = " (+" + str(sr_difference) + ")"
+
+            previous_sr = current_sr
+            current_time, date = get_date_and_time(country, city)
+            message = current_time + ": " + str(current_sr) + diff_text + "\n"
+            write_string_to_file(message, filename, directory)
+            #print(time + "\n" + "Skill Rating: " + str(skill_rating))
+            print(message)
+        else:
+            print(" no change")
+        print()
+        time.sleep(clock_cycle)
 
 if __name__ == "__main__":
     main()
