@@ -118,6 +118,7 @@ if __name__ == "__main__":
     pokemon_position = (420, 50)
     moves = get_moves(pokemon_names[0])
     opponent_moves = get_moves(pokemon_names[1])
+    all_moves = get_pokemon_info.get_dict("all_moves.txt")
     pokemon = create_pokemon(pokemon_numbers, [moves, opponent_moves])
     p0 = pokemon[0]
     p1 = pokemon[1]
@@ -131,6 +132,7 @@ if __name__ == "__main__":
     f1 = pygame.transform.scale(f1, (288, 288))
     bg = pygame.image.load("Resources\\battle_screen_with_moves_blank.png")
     moves_bar = pygame.image.load("Resources\\moves_bar.png")
+    move_selection = pygame.image.load("Resources\\move_selection.png")
     text_bar = pygame.image.load("Resources\\text_bar.png")
     hp_bar_1 = pygame.image.load("Resources\\hp_bar_01.png")
     hp_bar_2 = pygame.image.load("Resources\\hp_bar_02.png")
@@ -167,6 +169,9 @@ if __name__ == "__main__":
         move_surfaces += [get_move_surface(move, anti_alias, text_colour)]
         
     quadrants = initialise_display()
+    move_selection_pos = []
+    for quadrant in quadrants:
+        move_selection_pos += [(quadrant[0] + 3, quadrant[1] + 3)]
 
     # DEBUG printing:
     #print(pokemon[0].name, "'s stats:", pokemon[0].stats)
@@ -176,6 +181,8 @@ if __name__ == "__main__":
     game_over = False
     my_turn = True
     exit_game = False
+    move_selected = -1 # [-1, 0, 1] = [not selected, selected, confirmed]
+    selected_index = -2
     
     while 1:
         #time.sleep(0.01) # To slow down the animation
@@ -189,44 +196,56 @@ if __name__ == "__main__":
             elif event.type == pygame.MOUSEBUTTONUP:
                 mouse_position = pygame.mouse.get_pos()
                 i = mouse_in_quadrant(mouse_position, quadrants)
-                if game_state == "show_moves":
-                    if i > -1 and pokemon[0].stats["HP"] * \
-                                  pokemon[1].stats["HP"] != 0:
-                        current_move = moves[i]
-                        opponent_move = opponent_moves[random.randrange(3)]
-                        if game_over:
-                            game_state = "game_over"
-                        else:
-                            game_state = "battle_text_1"
-                        if not game_over:
-                            game_over, battle_text_1 = show_attack(p0, p1, current_move)
-                            last_move = battle_text_1
-                        if not game_over:
-                            game_over, battle_text_2 = show_attack(p1, p0, opponent_move)
-                            last_move = battle_text_2
-                        battle_text = last_move
-                elif game_state == "battle_text_1":
-                    if i > -1:
-                        if game_over:
-                            game_state = "game_over"
-                            if p0.stats["HP"] == 0:
-                                winner = p0.name
-                            elif p1.stats["HP"] == 0:
-                                winner = p1.name
-                        else:
-                            game_state = "battle_text_2"
-                elif game_state == "battle_text_2":
-                    if i > -1:
-                        if game_over:
-                            game_state = "game_over"
-                            if p0.stats["HP"] == 0:
-                                winner = p0.name
-                            elif p1.stats["HP"] == 0:
-                                winner = p1.name
-                        else:
-                            game_state = "show_moves"
-                elif game_state == "game_over":
-                    game_state = "exit_game"
+                if i != -1:
+                    if move_selected == -1:
+                        selected_index = i                        
+                        move_selected = 1
+                    elif move_selected == 0:
+                        move_selected = 1
+                    elif move_selected == 1:
+                        if game_state == "show_moves":
+                            if i == selected_index and pokemon[0].stats["HP"] * \
+                                          pokemon[1].stats["HP"] != 0:
+                                current_move = moves[i]
+                                opponent_move = opponent_moves[random.randrange(3)]
+                                if game_over:
+                                    game_state = "game_over"
+                                else:
+                                    game_state = "battle_text_1"
+                                if not game_over:
+                                    game_over, battle_text_1 = show_attack(p0, p1, current_move)
+                                    last_move = battle_text_1
+                                if not game_over:
+                                    game_over, battle_text_2 = show_attack(p1, p0, opponent_move)
+                                    last_move = battle_text_2
+                                battle_text = last_move
+                            else:
+                                if i > -1:
+                                    selected_index = i                        
+                        elif game_state == "battle_text_1":
+                            if i > -1:
+                                if game_over:
+                                    game_state = "game_over"
+                                    if p0.stats["HP"] == 0:
+                                        winner = p0.name
+                                    elif p1.stats["HP"] == 0:
+                                        winner = p1.name
+                                else:
+                                    game_state = "battle_text_2"
+                        elif game_state == "battle_text_2":
+                            if i > -1:
+                                if game_over:
+                                    game_state = "game_over"
+                                    if p0.stats["HP"] == 0:
+                                        winner = p0.name
+                                    elif p1.stats["HP"] == 0:
+                                        winner = p1.name
+                                else:
+                                    selected_index = -2
+                                    move_selected = -1                                    
+                                    game_state = "show_moves"
+                        elif game_state == "game_over":
+                            game_state = "exit_game"
             if game_state == "exit_game":
                 pygame.display.quit()
                 # Exit the program
@@ -290,6 +309,8 @@ if __name__ == "__main__":
             screen.blit(move_surfaces[1],(quadrants[1][0] + 10, quadrants[1][1] + 15))
             screen.blit(move_surfaces[2],(quadrants[2][0] + 30, quadrants[2][1] + 10))
             screen.blit(move_surfaces[3],(quadrants[3][0] + 10, quadrants[3][1] + 10))
+            if selected_index != -2:
+                screen.blit(move_selection, move_selection_pos[selected_index])            
         elif game_state == "battle_text_1":
             screen.blit(text_bar, (0, 337))
             screen.blit(battle_text_1[0], (25, 360))
@@ -304,7 +325,38 @@ if __name__ == "__main__":
             screen.blit(text_bar, (0, 337))
             screen.blit(battle_text[3], (25, 398))
             exit_game = True
-            #break
+
+        # Display pokemon names above their respective HP bars
+        p1_name_text = myfont.render(p1.name, True, text_colour)
+        p0_name_text = myfont.render(p0.name, True, text_colour)
+        name_text_pos = [(420, 236), (55, 54)]
+        screen.blit(p1_name_text, name_text_pos[1])
+        screen.blit(p0_name_text, name_text_pos[0])
+
+        # Display move information
+        highlighted_move = moves[selected_index]
+        move_data = all_moves[highlighted_move]
+        move_type = move_data[0]
+        move_phys_spec = move_data[1]
+        move_power = move_data[3]
+        move_text = []
+        move_text += ["Type: " + move_type[0:4].upper() + "/" + move_phys_spec[0:3].upper()]
+        move_text += ["Power: " + str(move_power)]
+        right_box = myfont.render(move_text[0] , anti_alias, text_colour)
+        screen.blit(right_box,(500, 395))
+
+        cover_quadrants = False
+        if cover_quadrants:
+            screen.fill(yellow, quadrants[0])
+            screen.fill(red, quadrants[1])
+            screen.fill(green, quadrants[2])
+            screen.fill(blue, quadrants[3])
+            
+        #screen.blit(move_selection, move_selection_pos[0])
+        #screen.blit(move_selection, move_selection_pos[1])
+        #screen.blit(move_selection, move_selection_pos[2])
+        #screen.blit(move_selection, move_selection_pos[3])
+        
         
         # update whole screen (use display.update(rectangle) to update
         # chosen rectangle portions of the screen to update
