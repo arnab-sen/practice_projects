@@ -26,7 +26,8 @@ def change_pixels(image, new_pixel_data):
     
 def main():
     create_directories("Input", "Output")
-    image = get_image("Test_01.png").convert("RGBA")
+    file_name = input("Enter your file name (e.g. file1.png): ")
+    image = get_image(file_name).convert("RGBA")
     pixel_data = get_RGBA(image)
     new_pixel_data = pixel_data
     white = (255, 255, 255)
@@ -36,7 +37,7 @@ def main():
             # channel 0
             new_pixel_data[i] = (0, 0, 0, 0)
     change_pixels(image, new_pixel_data)
-    save_image(image, "Output_Test_01.png")
+    save_image(image, file_name)
 
 if __name__ == "__main__":
     main()
