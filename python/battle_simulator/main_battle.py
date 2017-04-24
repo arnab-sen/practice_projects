@@ -54,6 +54,22 @@ def create_pokemon(pokemon_numbers, moves):
 
     return pokemon
 
+def load_pokemon_type_icons():
+    type_icons = {}
+    move_types = ["bug", "dark", "dragon", "electric", "fighting", "fire",
+                  "flying", "ghost", "grass", "ground", "ice", "normal",
+                  "other", "physical", "poison", "psychic", "rock",
+                  "special", "steel", "water"]
+    
+    for i in move_types:
+        icon = pygame.image.load("Resources\\Move Icons\\" + i + ".png")
+        if i != "physical" and i != "special" and i != "other":
+            icon = pygame.transform.scale(icon, (64, 32))
+        else:
+            icon = pygame.transform.scale(icon, (56, 28))
+        type_icons[i] = icon
+    return type_icons
+
 def mouse_in_quadrant(mouse_position, move_quadrants):
     for i in range(4):
         if move_quadrants[i].collidepoint(mouse_position):
@@ -131,6 +147,7 @@ if __name__ == "__main__":
     f1 = pygame.image.load("Resources\\bwback-001n\\" + pokemon_1 + ".png")
     f1 = pygame.transform.scale(f1, (288, 288))
     bg = pygame.image.load("Resources\\battle_screen_with_moves_blank.png")
+    type_icons = load_pokemon_type_icons()
     moves_bar = pygame.image.load("Resources\\moves_bar.png")
     move_selection = pygame.image.load("Resources\\move_selection.png")
     text_bar = pygame.image.load("Resources\\text_bar.png")
@@ -309,8 +326,30 @@ if __name__ == "__main__":
             screen.blit(move_surfaces[1],(quadrants[1][0] + 10, quadrants[1][1] + 15))
             screen.blit(move_surfaces[2],(quadrants[2][0] + 30, quadrants[2][1] + 10))
             screen.blit(move_surfaces[3],(quadrants[3][0] + 10, quadrants[3][1] + 10))
+            
             if selected_index != -2:
-                screen.blit(move_selection, move_selection_pos[selected_index])            
+                screen.blit(move_selection, move_selection_pos[selected_index])
+
+                # Display move information
+                highlighted_move = moves[selected_index]
+                move_data = all_moves[highlighted_move]
+                move_type = move_data[0]
+                move_phys_spec = move_data[1]
+                move_power = move_data[3]
+                move_accuracy = move_data[4]
+                move_text = ["Power: " + str(move_power)]
+                #move_text += ["Type: " + move_type[0:4].upper() + "/" + move_phys_spec[0:3].upper()]
+                move_text += ["Type: "]            
+                move_text += ["Accuracy: " + str(move_accuracy) + "%"]
+                right_box = [myfont.render(move_text[0] , anti_alias, text_colour)]
+                right_box += [myfont.render(move_text[1] , anti_alias, text_colour)]
+                right_box += [myfont.render(move_text[2] , anti_alias, text_colour)]
+                screen.blit(right_box[0],(505, 360))
+                screen.blit(right_box[1],(505, 395))
+                screen.blit(right_box[2],(505, 430))
+                screen.blit(type_icons[move_type],(573, 392))
+                screen.blit(type_icons[move_phys_spec],(641, 394))
+        
         elif game_state == "battle_text_1":
             screen.blit(text_bar, (0, 337))
             screen.blit(battle_text_1[0], (25, 360))
@@ -332,18 +371,6 @@ if __name__ == "__main__":
         name_text_pos = [(420, 236), (55, 54)]
         screen.blit(p1_name_text, name_text_pos[1])
         screen.blit(p0_name_text, name_text_pos[0])
-
-        # Display move information
-        highlighted_move = moves[selected_index]
-        move_data = all_moves[highlighted_move]
-        move_type = move_data[0]
-        move_phys_spec = move_data[1]
-        move_power = move_data[3]
-        move_text = []
-        move_text += ["Type: " + move_type[0:4].upper() + "/" + move_phys_spec[0:3].upper()]
-        move_text += ["Power: " + str(move_power)]
-        right_box = myfont.render(move_text[0] , anti_alias, text_colour)
-        screen.blit(right_box,(500, 395))
 
         cover_quadrants = False
         if cover_quadrants:
