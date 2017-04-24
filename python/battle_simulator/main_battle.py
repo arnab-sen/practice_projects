@@ -83,7 +83,9 @@ def show_attack(attacker, defender, current_move):
     temp_HP = defender.stats["HP"]
     battle_text_message = []
     battle_text = []
+            
     battle.attack(attacker, defender, current_move)
+    
     if temp_HP != defender.stats["HP"]:
         battle_text_message += ["", attacker.name + " used " +\
                             current_move + "!", ""]
@@ -99,6 +101,11 @@ def show_attack(attacker, defender, current_move):
     #      str(temp_HP) + \
     #      " to " + str(defender.stats["HP"]))
     #print()
+    
+    if attacker.stats["HP"] == 0:
+        battle_text_message += [attacker.name + " fainted... " + defender.name + " wins!"]
+        battle_over = True
+        return battle_over, battle_text
     if defender.stats["HP"] == 0:
         battle_text_message += [defender.name + " fainted... " + attacker.name + " wins!"]
         battle_over = True
@@ -242,7 +249,10 @@ if __name__ == "__main__":
                         elif game_state == "battle_text_1":
                             if i > -1:
                                 if game_over:
-                                    game_state = "game_over"
+                                    if p1.stats["HP"] == 0:
+                                        game_state = "game_over"
+                                    else:
+                                        game_state = "battle_text_2"
                                     if p0.stats["HP"] == 0:
                                         winner = p0.name
                                     elif p1.stats["HP"] == 0:
