@@ -1,3 +1,10 @@
+"""
+RGBeGone! allows a user to select a colour (in RGB), and then turn all pixels
+of that colour into transparent pixels for an image.
+Input: images from the Input folder
+Output: images to the Output folder
+"""
+
 from PIL import Image
 import os
 
