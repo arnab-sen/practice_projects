@@ -1,5 +1,6 @@
 import sys, pygame, time, random
 import battle, get_pokemon_info
+from PIL import Image
 
 def initialise_display():
     moves_top_left = (18, 356)
@@ -115,6 +116,35 @@ def show_attack(attacker, defender, current_move):
 
     return battle_over, battle_text
 
+def split_list(cols, linear_list):
+    temp_list = []
+    split_list = []
+    for i in range(len(linear_list)):
+        temp_list += [linear_list[i]]
+        if (i + 1) % cols == 0:
+            split_list += [temp_list]
+            temp_list = []
+
+    return split_list
+
+def get_opponent_position(opponent_number):
+    # Find the bottom-most pixel in the middle column, and align
+    # that with the center of the opponent stage
+    image = Image.open("Resources\\bw-001n\\" + opponent_number + ".png")
+    image = image.resize((192, 192), Image.ANTIALIAS)
+    image = image.convert("RGBA")
+    pixel_data = list(image.getdata())
+    pixel_data = split_list(192, pixel_data)
+    middle = 96
+    stage_middle = (520, 195)
+    
+    for i in range(96, len(pixel_data)):
+            if pixel_data[i][middle][3] != 0:
+                    bottom = i
+                    
+    return (stage_middle[0] - middle, stage_middle[1] - bottom)
+	
+
 if __name__ == "__main__":
     pygame.init()
     pygame.font.init()
@@ -134,21 +164,22 @@ if __name__ == "__main__":
 
     number_of_pokemon = 2
     pokemon_numbers = get_random_pokemon(number_of_pokemon)
-    #pokemon_numbers[0] = "006"
+    pokemon_numbers[1] = "007"
     pokemon_names = get_pokemon_names(pokemon_numbers)
     pokemon_1 = pokemon_numbers[0]
     pokemon_2 = pokemon_numbers[1]
-    pokemon_position = (420, 50)
+    #pokemon_position = (420, 50)
     moves = get_moves(pokemon_names[0])
     opponent_moves = get_moves(pokemon_names[1])
     all_moves = get_pokemon_info.get_dict("all_moves.txt")
     pokemon = create_pokemon(pokemon_numbers, [moves, opponent_moves])
     p0 = pokemon[0]
     p1 = pokemon[1]
-    if pokemon_1 == "632": pokemon_position = (380, 20)
+    #if pokemon_1 == "632": pokemon_position = (380, 20)
     # Test pokemon
     # Original size: 96 x 96, scaled size = 288, 288
     f2 = pygame.image.load("Resources\\bw-001n\\" + pokemon_2 + ".png")
+    pokemon_position = get_opponent_position(pokemon_2)
     #f2 = pygame.transform.scale(f2, (288, 288))
     f2 = pygame.transform.scale(f2, (192, 192))
     f1 = pygame.image.load("Resources\\bwback-001n\\" + pokemon_1 + ".png")
