@@ -66,8 +66,17 @@ def get_date_and_time(country, city):
         if "ctdat" in i: date = get_data_between_tags(i)
         
     return time, date
+
+def show_menu():
+    print("1. Manual\n2. Auto")
+    choice = input("Enter your choice: ")
+    if choice == "1": choice = 1
+    elif choice == "2": choice = 2
+    else: choice = 1
+    return choice
     
 def main():
+    choice = show_menu()
     country = input("Enter country: ")
     city = input("Enter city: ")
     current_time, date = get_date_and_time(country, city)
@@ -75,14 +84,15 @@ def main():
     directory = "OW SR Logs"
     write_string_to_file("--- " + date + " ---" + "\n\n", filename, directory)
     url = get_user_info()
-    clock_cycle = 1 # seconds to wait
+    clock_cycle = 900 # seconds to wait
     page_html = get_html(url, "messy")
     skill_rating = get_skill_rating(page_html)
     previous_sr = skill_rating
     current_sr = previous_sr
     starting_sr_message = "Starting SR: " + str(current_sr) + "\n"
     write_string_to_file(starting_sr_message, filename, directory)
-
+    print("Starting SR:", current_sr)
+    
     #test_sr = []
     while(1):
     #for sr in test_sr:
@@ -107,7 +117,13 @@ def main():
         else:
             print(" no change")
         print()
-        time.sleep(clock_cycle)
+        if choice == 1:
+            input("Press enter to check again")
+        elif choice == 2:
+            time.sleep(clock_cycle)
+        else:
+            print("Unexpected break")
+            break
 
 if __name__ == "__main__":
     main()
