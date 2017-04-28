@@ -12,9 +12,19 @@ import time
 from bs4 import BeautifulSoup
 
 def get_user_info():
-    battletag = input("Enter your battletag: ")
+    if file_exists("OW SR Logs\\info.txt"):
+        with open("OW SR Logs\\info.txt") as file:
+            text = file.read().split("\n")
+            country = text[0]
+            city = text[1]
+            battletag = text[2]
+    else:
+        country = input("Enter country: ")
+        city = input("Enter city: ")
+        battletag = input("Enter your battletag: ")
+        print()
     url = "https://playoverwatch.com/en-us/career/pc/us/" + battletag
-    return url
+    return url, country, city
 
 def get_html(url, form):
     with urllib.request.urlopen(url) as response:
@@ -31,14 +41,16 @@ def file_exists(file_path):
     if os.path.isfile(file_path): return True
     else: return False
 
-def write_string_to_file(content, filename, directory):
+def write_string_to_file(content, filename, directory, overwrite):
     # Make a directory folder if it doesn't already
     # exist, then save a text file to that folder
     if not os.path.exists(directory):
         os.makedirs(directory)
     # "a" rather than "w" so the txt file is added to
     # rather than overwritten
-    with open(directory + "\\" + filename, "a") as file:
+    if overwrite: arg = "w"
+    else: arg = "a"
+    with open(directory + "\\" + filename, arg) as file:
         file.write(content)
         
 def get_skill_rating(html):
@@ -68,33 +80,61 @@ def get_date_and_time(country, city):
     return time, date
 
 def show_menu():
-    print("1. Manual\n2. Auto")
+    print("1. Manual\n2. Auto\n")
     choice = input("Enter your choice: ")
+    print()
     if choice == "1": choice = 1
     elif choice == "2": choice = 2
+    elif choice == "debug": choice = 0
     else: choice = 1
     return choice
+
+def clean_log(filename, directory):
+    # This removes duplicates and entries with no sr change
+    with open(directory + "\\" + filename, "r") as file:
+        text_list = file.read().split("\n")
+    new_log = []
+    temp = []
+    output = ""
+    overwrite = True
+    for line in text_list:
+        if line not in new_log:
+            if "---" in line and temp != []:
+                new_log += temp
+                temp = ["\n" + line]
+            elif line != "":
+                temp += [line]
+                
+    for i in new_log:
+        output += (i + "\n")
+
+    write_string_to_file(output, filename[:-4] + "_clean.txt", directory, overwrite)
     
 def main():
     choice = show_menu()
-    country = input("Enter country: ")
-    city = input("Enter city: ")
-    current_time, date = get_date_and_time(country, city)
-    filename = "sr_log.txt"
-    directory = "OW SR Logs"
-    write_string_to_file("--- " + date + " ---" + "\n\n", filename, directory)
-    url = get_user_info()
-    clock_cycle = 900 # seconds to wait
-    page_html = get_html(url, "messy")
-    skill_rating = get_skill_rating(page_html)
-    previous_sr = skill_rating
-    current_sr = previous_sr
-    starting_sr_message = "Starting SR: " + str(current_sr) + "\n"
-    write_string_to_file(starting_sr_message, filename, directory)
-    print("Starting SR:", current_sr)
+    overwrite = False
+    
+    if choice == 0:
+        check_sr = False
+    else:
+        check_sr = True
+        url, country, city = get_user_info()        
+        current_time, date = get_date_and_time(country, city)
+        filename = "sr_log.txt"
+        directory = "OW SR Logs"
+        write_string_to_file("--- " + date + " ---" + "\n\n", filename, directory\
+                             , overwrite)
+        clock_cycle = 900 # seconds to wait
+        page_html = get_html(url, "messy")
+        skill_rating = get_skill_rating(page_html)
+        previous_sr = skill_rating
+        current_sr = previous_sr
+        starting_sr_message = "Starting SR: " + str(current_sr) + "\n"
+        write_string_to_file(starting_sr_message, filename, directory, overwrite)
+        print("Starting SR:", current_sr)
     
     #test_sr = []
-    while(1):
+    while(check_sr):
     #for sr in test_sr:
         print("Checking...", end = "")
         page_html = get_html(url, "messy")
@@ -111,19 +151,28 @@ def main():
             previous_sr = current_sr
             current_time, date = get_date_and_time(country, city)
             message = current_time + ": " + str(current_sr) + diff_text + "\n"
-            write_string_to_file(message, filename, directory)
+            write_string_to_file(message, filename, directory, overwrite)
             #print(time + "\n" + "Skill Rating: " + str(skill_rating))
             print(message)
         else:
             print(" no change")
+            
         print()
+        clean_log(filename, directory)
+        
         if choice == 1:
-            input("Press enter to check again")
+            new_choice = input("Press enter to check again or "\
+                               + "type \"exit\" to exit: ")
+            if new_choice == "exit":
+                print("Exiting...")
+                break
         elif choice == 2:
             time.sleep(clock_cycle)
         else:
             print("Unexpected break")
             break
+
+    
 
 if __name__ == "__main__":
     main()
