@@ -89,7 +89,7 @@ def show_menu():
     else: choice = 1
     return choice
 
-def clean_log(filename, directory):
+def clean_log(filename, directory, date):
     # This removes duplicates and entries with no sr change
     with open(directory + "\\" + filename, "r") as file:
         text_list = file.read().split("\n")
@@ -106,7 +106,11 @@ def clean_log(filename, directory):
                 temp += [line]
                 
     for i in new_log:
-        output += (i + "\n")
+        if date in i:
+            if date not in output:
+                output += (i + "\n")
+        else:
+            output += (i + "\n")
 
     write_string_to_file(output, filename[:-4] + "_clean.txt", directory, overwrite)
     
@@ -158,7 +162,7 @@ def main():
             print(" no change")
             
         print()
-        clean_log(filename, directory)
+        clean_log(filename, directory, date)
         
         if choice == 1:
             new_choice = input("Press enter to check again or "\
@@ -170,9 +174,7 @@ def main():
             time.sleep(clock_cycle)
         else:
             print("Unexpected break")
-            break
-
-    
+            break    
 
 if __name__ == "__main__":
     main()
