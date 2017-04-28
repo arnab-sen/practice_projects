@@ -140,12 +140,43 @@ def main():
     #test_sr = []
     while(check_sr):
     #for sr in test_sr:
-        print("Checking...", end = "")
-        page_html = get_html(url, "messy")
-        skill_rating = get_skill_rating(page_html)
-        #skill_rating = sr
-        if skill_rating != previous_sr:
-            current_sr = skill_rating
+        
+        
+        if choice == 2:
+            print("Checking...", end = "")
+            page_html = get_html(url, "messy")
+            skill_rating = get_skill_rating(page_html)
+            #skill_rating = sr
+            if skill_rating != previous_sr:
+                current_sr = skill_rating
+                sr_difference = current_sr - previous_sr
+                if sr_difference < 0:
+                    diff_text = " (" + str(sr_difference) + ")"
+                else:
+                    diff_text = " (+" + str(sr_difference) + ")"
+
+                previous_sr = current_sr
+                current_time, date = get_date_and_time(country, city)
+                message = current_time + ": " + str(current_sr) + diff_text + "\n"
+                write_string_to_file(message, filename, directory, overwrite)
+                #print(time + "\n" + "Skill Rating: " + str(skill_rating))
+                print(message)
+            else:
+                print(" no change")
+                
+            print()
+            clean_log(filename, directory, date)            
+            new_choice = input("Press enter to check again or "\
+                               + "type \"exit\" to exit: ")
+            if new_choice == "exit":
+                print("Exiting...")
+                break
+        elif choice == 1:
+            #time.sleep(clock_cycle)
+            current_sr = int(input("Enter current SR: "))
+            if current_sr == -1:
+                print("Exiting...")
+                break
             sr_difference = current_sr - previous_sr
             if sr_difference < 0:
                 diff_text = " (" + str(sr_difference) + ")"
@@ -155,23 +186,10 @@ def main():
             previous_sr = current_sr
             current_time, date = get_date_and_time(country, city)
             message = current_time + ": " + str(current_sr) + diff_text + "\n"
-            write_string_to_file(message, filename, directory, overwrite)
+            write_string_to_file(message, filename, directory, False)
             #print(time + "\n" + "Skill Rating: " + str(skill_rating))
             print(message)
-        else:
-            print(" no change")
-            
-        print()
-        clean_log(filename, directory, date)
-        
-        if choice == 1:
-            new_choice = input("Press enter to check again or "\
-                               + "type \"exit\" to exit: ")
-            if new_choice == "exit":
-                print("Exiting...")
-                break
-        elif choice == 2:
-            time.sleep(clock_cycle)
+            clean_log(filename, directory, date)
         else:
             print("Unexpected break")
             break    
