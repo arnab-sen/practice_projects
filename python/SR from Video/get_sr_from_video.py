@@ -121,7 +121,10 @@ def get_digits(sr_block):
     for i in range(len(edges) - 1):
         digits[i] = sr_block.crop((edges[i], 0, edges[i + 1], height))
 
-    save_digits = True
+    for digit in digits:
+        clean_digit(digit)
+
+    save_digits = True        
     if save_digits:
         for i, image in enumerate(digits):
             image.save("digit " + str(i) + ".png")
@@ -256,24 +259,51 @@ def recognise_digits(digits, pixel_counts):
         sr += str(likely_digit)
 
     print(sr)
-    #print(all_matches)     
+    #print(all_matches)
+
+def split_to_linear(list_2D):
+    linear_list = []
+    for element in list_2D:
+        linear_list += element
+
+    return linear_list
+
+def clean_digit(image):
+    # applies a black, two-pixel wide rectangle onto the bottom
+    # right of the digit image
+    width, height = image.size[0], image.size[1]
+    pixel_data= list(image.getdata())
+    pixel_data = split_list(width, pixel_data)
+    for i in range(height // 2, height):
+        for j in range(width - 2, width):
+            pixel_data[i][j] = black
+    pixel_data = split_to_linear(pixel_data)
+    image = image.putdata(pixel_data)
         
 def main():   
     file_name = "tests\\nums "
-    for i in range(1, 8):
-        file_name = "tests\\nums " + str(i)
-        sr_block = get_sr_block(get_frame("nums " + str(i)))
-        #sr_block.save("sr_block_cropped.png")
-        #sr_block.save(file_name + ".png")
-        simplify_image(sr_block)
-        sr_block.save(file_name + ".png")
-        #get_data()
-        #print(type(frame))
-        sr_block = Image.open(file_name + ".png")
-        digits = get_digits(sr_block)
-        pixel_counts = get_base_data()
-        print(file_name[6:] + ": ", end = "")
-        recognise_digits(digits, pixel_counts)
+    test = True
+    if test == True:
+        for i in range(1, 8):
+            file_name = "nums " + str(i)
+            sr_block = get_sr_block(get_frame("nums " + str(i)))
+            #sr_block.save("sr_block_cropped.png")
+            #sr_block.save(file_name + ".png")
+            simplify_image(sr_block)
+            sr_block.save(file_name + ".png")
+            #get_data()
+            #print(type(frame))
+            sr_block = Image.open(file_name + ".png")
+            digits = get_digits(sr_block)
+            pixel_counts = get_base_data()
+            print(file_name[6:] + ": ", end = "")
+            recognise_digits(digits, pixel_counts)
+
+    #digit = Image.open("digits\\7.png")
+    #clean_digit(digit)
+    #digit.save("digits\\7_clean.png")
+    file_name = "nums 1"
+    
     
     pass
 
@@ -282,7 +312,10 @@ if __name__ == "__main__":
 
 """
 ISSUES:
-- Confused between 6, 8, 9, 0
+- Confuses 8 for 0
+- Confuses 9 for 0
+- Confuses 8 for 6
+- Failed tests: nums 1, 2, 3, 5
 - Digit divisions are not clean (they have remainders of surrounding
   digits), so cleaning these divisions may help with image recognition
 """
