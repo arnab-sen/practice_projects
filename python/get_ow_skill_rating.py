@@ -97,6 +97,7 @@ def clean_log(filename, directory, date):
     temp = []
     output = ""
     overwrite = True
+    clean_file = filename[:-4] + "_clean.txt"
     for line in text_list:
         if line not in new_log:
             if "---" in line and temp != []:
@@ -112,7 +113,9 @@ def clean_log(filename, directory, date):
         else:
             output += (i + "\n")
 
-    write_string_to_file(output, filename[:-4] + "_clean.txt", directory, overwrite)
+    write_string_to_file(output, clean_file,\
+                         directory, overwrite = True)
+    write_string_to_file("\n", clean_file, directory, overwrite = False)
     
 def main():
     choice = show_menu()
