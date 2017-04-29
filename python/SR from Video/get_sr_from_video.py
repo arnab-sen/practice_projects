@@ -4,6 +4,9 @@ import os
 import copy
 from PIL import Image
 
+white = (255, 255, 255)
+black = (0, 0, 0)
+
 def get_frame(file_name):
     # Opens the latest video recording and returns
     # one of the last frames, which should be from
@@ -32,6 +35,7 @@ def get_sr_block(file_name):
     career_profile = Image.open(file_name)
     career_profile = career_profile.resize((1280, 720), Image.ANTIALIAS)
     sr_block = career_profile.crop((1052, 81, 1097, 103))
+    
     return sr_block
 
 def simplify_image(image):
@@ -124,6 +128,38 @@ def get_digits(sr_block):
 
     return digits
 
+def get_thirds(images):
+    thirds = []
+    temp = []
+    
+    for image in images:
+        width, height = image.size[0], image.size[1]
+        third = height // 3
+        temp += [image.crop((0, 0, width, third))]
+        temp += [image.crop((0, third, width, third * 2))]
+        temp += [image.crop((0, third * 2, width, height))]
+        thirds += [temp]
+        temp = []
+
+    return thirds
+
+def count_digits(thirds):
+    # Count the white pixels in each third
+    temp = []
+    pixel_counts = []
+    
+    for digits in thirds:
+        for third in digits:
+            count = 0
+            pixel_data = list(third.getdata())
+            for pixel in pixel_data:
+                if pixel == white: count += 1
+            temp += [count]
+        pixel_counts += [temp]
+        temp = []
+
+    return pixel_counts
+
 def get_base_data():
     # Retrieves the base information for recognising digits:
     # how many white pixels are in each third of each number;
@@ -146,29 +182,81 @@ def get_base_data():
     width, height = digits[0].size[0], digits[0].size[1]
     third = height // 3
     
-    for i in range(10):
-        temp += [digits[i].crop((0, 0, width, third))]
-        temp += [digits[i].crop((0, third, width, third * 2))]
-        temp += [digits[i].crop((0, third * 2, width, height))]
-        thirds += [temp]
-        temp = []
-
-    # Count the white pixels
-    for digits in thirds:
-        for third in digits:
-            count = 0
-            pixel_data = list(third.getdata())
-            for pixel in pixel_data:
-                if pixel == white: count += 1
-            temp += [count]
-        pixel_counts += [temp]
-        temp = []
+    thirds = get_thirds(digits)
+    pixel_counts = count_digits(thirds)
 
     #print(pixel_counts)
     #thirds[0][0].save("digits\\0_third_1.png")
         
     return pixel_counts
 
+def reset_counts(pixel_differences):
+    for i in range(10):
+        pixel_differences[str(i)] = 0
+
+def recognise_digits(digits, pixel_counts):
+    # If in doubt, the priority for recognition goes to the
+    # total pixel count
+    
+    thirds = get_thirds(digits)
+    pixel_counts = count_digits(thirds)
+    base_pixel_counts = get_base_data()
+    pixel_differences = {}
+    differences = 0
+    min_difference = 1000
+    closest_match = 0
+    matches = []
+    all_matches = []
+    total_differences = 0
+    total_counts = []
+    base_total_counts = []
+    min_difference_total = 1000
+    total_matches = []
+    sr = ""
+    
+    reset_counts(pixel_differences)
+        
+    for i, digit in enumerate(pixel_counts):
+        for j in range(3):
+            for k in range(10):
+                difference = abs(digit[j] - base_pixel_counts[k][j])
+                #print(digit[j], base_pixel_counts[k][j], difference)
+                if difference < min_difference:
+                    closest_match = k
+                    #print(closest_match)
+                    min_difference = difference
+                    
+            matches += [closest_match]
+            min_difference = 1000
+        all_matches += [matches]
+        matches = []
+
+    for third_counts in base_pixel_counts:
+        base_total_counts += [sum(third_counts)]
+
+    for third_counts in pixel_counts:
+        total_counts += [sum(third_counts)]
+
+    for i, total in enumerate(total_counts):
+        for j in range(10):
+            total_difference = abs(total - base_total_counts[j])
+            if total_difference < min_difference:
+                closest_total_match = j
+                min_difference = total_difference
+        total_matches += [closest_total_match]
+        closest_match_total = []
+        min_difference = 1000
+    print(total_matches)
+
+    for i, match in enumerate(all_matches):
+        likely_digit = total_matches[i]
+        # Priority goes to repeats, then to the uppermost third's match
+        # Check for repeats:
+        if match[1] == match[2]: likely_digit = match[1]
+        sr += str(likely_digit)
+
+    print(sr)
+    #print(all_matches)     
         
 def main():   
     #file_name = "test"
@@ -179,9 +267,10 @@ def main():
     #sr_block.save("test_contrast.png")
     #get_data()
     #print(type(frame))
-    sr_block = Image.open("test_contrast.png")
+    sr_block = Image.open("nums 7.png")
     digits = get_digits(sr_block)
     pixel_counts = get_base_data()
+    recognise_digits(digits, pixel_counts)
     
     pass
 
