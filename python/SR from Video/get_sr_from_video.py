@@ -117,8 +117,12 @@ def get_digits(sr_block):
     for i in range(len(edges) - 1):
         digits[i] = sr_block.crop((edges[i], 0, edges[i + 1], height))
 
-    for i, image in enumerate(digits):
-        image.save("digit " + str(i) + ".png")
+    save_digits = False
+    if save_digits:
+        for i, image in enumerate(digits):
+            image.save("digit " + str(i) + ".png")
+
+    return digits
 
 def get_base_data():
     # Retrieves the base information for recognising digits:
@@ -164,6 +168,7 @@ def get_base_data():
     #thirds[0][0].save("digits\\0_third_1.png")
         
     return pixel_counts
+
         
 def main():   
     #file_name = "test"
@@ -174,9 +179,9 @@ def main():
     #sr_block.save("test_contrast.png")
     #get_data()
     #print(type(frame))
-    #sr_block = Image.open("nums 6.png")
-    #digits = get_digits(sr_block)
-    get_base_data()
+    sr_block = Image.open("test_contrast.png")
+    digits = get_digits(sr_block)
+    pixel_counts = get_base_data()
     
     pass
 
