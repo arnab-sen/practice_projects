@@ -49,7 +49,7 @@ def simplify_image(image):
     average = get_average_colour(image)
     pixel_data = list(image.getdata())
     for i in range(len(pixel_data)):
-        if sum(pixel_data[i]) > average:
+        if sum(pixel_data[i]) > average + (average // 2):
             pixel_data[i] = white
         else:
             pixel_data[i] = black
@@ -121,7 +121,7 @@ def get_digits(sr_block):
     for i in range(len(edges) - 1):
         digits[i] = sr_block.crop((edges[i], 0, edges[i + 1], height))
 
-    save_digits = False
+    save_digits = True
     if save_digits:
         for i, image in enumerate(digits):
             image.save("digit " + str(i) + ".png")
@@ -246,7 +246,7 @@ def recognise_digits(digits, pixel_counts):
         total_matches += [closest_total_match]
         closest_match_total = []
         min_difference = 1000
-    print(total_matches)
+    #print(total_matches)
 
     for i, match in enumerate(all_matches):
         likely_digit = total_matches[i]
@@ -259,20 +259,30 @@ def recognise_digits(digits, pixel_counts):
     #print(all_matches)     
         
 def main():   
-    #file_name = "test"
-    #sr_block = get_sr_block(get_frame(file_name))
-    #sr_block.save("sr_block_cropped.png")
-    #sr_block.save("test_sr_block.png")
-    #simplify_image(sr_block)
-    #sr_block.save("test_contrast.png")
-    #get_data()
-    #print(type(frame))
-    sr_block = Image.open("nums 7.png")
-    digits = get_digits(sr_block)
-    pixel_counts = get_base_data()
-    recognise_digits(digits, pixel_counts)
+    file_name = "tests\\nums "
+    for i in range(1, 8):
+        file_name = "tests\\nums " + str(i)
+        sr_block = get_sr_block(get_frame("nums " + str(i)))
+        #sr_block.save("sr_block_cropped.png")
+        #sr_block.save(file_name + ".png")
+        simplify_image(sr_block)
+        sr_block.save(file_name + ".png")
+        #get_data()
+        #print(type(frame))
+        sr_block = Image.open(file_name + ".png")
+        digits = get_digits(sr_block)
+        pixel_counts = get_base_data()
+        print(file_name[6:] + ": ", end = "")
+        recognise_digits(digits, pixel_counts)
     
     pass
 
 if __name__ == "__main__":
     main()
+
+"""
+ISSUES:
+- Confused between 6, 8, 9, 0
+- Digit divisions are not clean (they have remainders of surrounding
+  digits), so cleaning these divisions may help with image recognition
+"""
