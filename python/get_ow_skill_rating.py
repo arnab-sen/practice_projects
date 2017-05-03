@@ -129,7 +129,7 @@ def main():
         current_time, date = get_date_and_time(country, city)
         filename = "sr_log.txt"
         directory = "OW SR Logs"
-        write_string_to_file("--- " + date + " ---" + "\n\n", filename, directory\
+        write_string_to_file("\n--- " + date + " ---" + "\n\n", filename, directory\
                              , overwrite)
         clock_cycle = 900 # seconds to wait
         page_html = get_html(url, "messy")
