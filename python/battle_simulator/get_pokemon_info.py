@@ -426,6 +426,20 @@ def get_base_stats():
     pokemon_stats["Mime Jr."] = [20, 25, 45, 70, 90, 60]
    
     write_string_to_file(dict_to_string(pokemon_stats), "pokemon_stats.txt")
+
+def get_stat_moves():
+    other_moves = get_dict("other_moves.txt")
+    stat_changes = {}
+    non_stat_changes = {}
+    for move in other_moves:
+        description = other_moves[move][5]
+        if "stat" in description:
+            stat_changes[move] = description
+        else:
+            non_stat_changes[move] = description
+
+    write_string_to_file(dict_to_string(stat_changes), "stat_changes.txt")
+    write_string_to_file(dict_to_string(non_stat_changes), "non_stat_changes.txt")
                 
 if __name__ == "__main__":
     #get_attackdex()
@@ -451,5 +465,6 @@ if __name__ == "__main__":
     #    if numbered_pokemon[num] not in pokemon_stats:
     #        #print(numbered_pokemon[num])
     #        pass
+    get_stat_moves()
     pass
 
