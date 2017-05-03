@@ -296,14 +296,13 @@ def main():
             sr_block = Image.open(file_name + ".png")
             digits = get_digits(sr_block)
             pixel_counts = get_base_data()
-            print(file_name[6:] + ": ", end = "")
+            print(file_name + ": ", end = "")
             recognise_digits(digits, pixel_counts)
 
     #digit = Image.open("digits\\7.png")
     #clean_digit(digit)
     #digit.save("digits\\7_clean.png")
-    file_name = "nums 1"
-    
+    file_name = "nums 1"   
     
     pass
 
