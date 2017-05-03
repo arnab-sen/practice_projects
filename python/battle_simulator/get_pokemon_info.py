@@ -428,18 +428,50 @@ def get_base_stats():
     write_string_to_file(dict_to_string(pokemon_stats), "pokemon_stats.txt")
 
 def get_stat_moves():
+    # Basic filter between stat-changing and non stat-changing
     other_moves = get_dict("other_moves.txt")
     stat_changes = {}
     non_stat_changes = {}
     for move in other_moves:
         description = other_moves[move][5]
-        if "stat" in description:
+        if "stat" in description.lower():
             stat_changes[move] = description
         else:
             non_stat_changes[move] = description
 
     write_string_to_file(dict_to_string(stat_changes), "stat_changes.txt")
     write_string_to_file(dict_to_string(non_stat_changes), "non_stat_changes.txt")
+
+    # Create different txt files for each stat being changed
+    sp_atk_changes = {}
+    atk_changes = {}
+    sp_def_changes = {}
+    def_changes = {}
+    speed_changes = {}
+    remaining_other = {}
+    
+    for move in other_moves:
+        description = other_moves[move][5]
+        desc = description.lower()
+        if "sp. atk" in desc or "special at" in desc:
+            sp_atk_changes[move] = description
+        elif "sp. def" in desc or "special def" in desc:
+            sp_def_changes[move] = description
+        elif "attack" in desc or "atk" in desc:
+            atk_changes[move] = description
+        elif "defence" in desc or "defens" in desc:
+            def_changes[move] = description
+        elif "speed" in desc or "spd" in desc:
+            speed_changes[move] = description
+        else:
+            remaining_other[move] = description
+
+    write_string_to_file(dict_to_string(sp_atk_changes), "sp_atk_changes.txt")
+    write_string_to_file(dict_to_string(sp_def_changes), "sp_def_changes.txt")
+    write_string_to_file(dict_to_string(atk_changes), "atk_changes.txt")
+    write_string_to_file(dict_to_string(def_changes), "def_changes.txt")
+    write_string_to_file(dict_to_string(speed_changes), "speed_changes.txt")
+    write_string_to_file(dict_to_string(remaining_other), "remaining_other.txt")
                 
 if __name__ == "__main__":
     #get_attackdex()
