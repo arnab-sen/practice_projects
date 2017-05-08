@@ -44,6 +44,17 @@ def create_pokemon(pokemon_numbers, moves):
 
     return pokemon
 
+def split_list(cols, linear_list):
+    temp_list = []
+    split_list = []
+    for i in range(len(linear_list)):
+        temp_list += [linear_list[i]]
+        if (i + 1) % cols == 0:
+            split_list += [temp_list]
+            temp_list = []
+
+    return split_list
+
 def get_opponent_position(opponent_number):
     # Find the bottom-most pixel in the middle column, and align
     # that with the center of the opponent stage
@@ -78,7 +89,7 @@ def load_pokemon_type_icons():
     return type_icons
 
 def get_move_surface(move, anti_alias, text_colour):
-    return myfont.render(move, True, text_colour)
+    return res["font"].render(move, True, text_colour)
 
 def initialise_display():
     moves_top_left = (18, 356)
@@ -92,21 +103,21 @@ def initialise_display():
     
     return [quadrant_1, quadrant_2, quadrant_3, quadrant_4]
 
-def main():
+def main(resources):
     # Initialise
-    res = {} # resources database
+    res = resources
     pygame.init()
     pygame.font.init()
-    res["myfont"] = pygame.font.Font("Resources\\Pokemon Fonts\\pkmnrs.ttf", 30)
+    res["font"] = pygame.font.Font("Resources\\Pokemon Fonts\\pkmnrs.ttf", 30)
     res["black"] = (0, 0, 0)
     res["red"] = (255, 0, 0)
     res["green"] = (0, 255, 0)
     res["yellow"] = (255, 255, 0)
     res["blue"] = (0, 0, 255)
-    res["text_colour"] = res["black"]
-    res["anti_alias"] = True
+    res["text colour"] = res["black"]
+    res["anti alias"] = True
     res["size"] = 720, 480
-    screen = pygame.display.set_mode(res["size"])
+    res["screen"] = pygame.display.set_mode(res["size"])
     number_of_pokemon = 2
     pokemon_numbers = get_random_pokemon(number_of_pokemon)
     pokemon_names = get_pokemon_names(pokemon_numbers)
@@ -163,7 +174,7 @@ def main():
 
     res["move surfaces"] = []
     for move in res["my moves"]:
-        res["move surfaces"] += [get_move_surface(move, anti_alias, res["text colour"])]
+        res["move surfaces"] += [get_move_surface(move, res["anti alias"], res["text colour"])]
 
     res["quadrants"] = initialise_display()
     res["move selection pos"] = []
@@ -177,5 +188,8 @@ def main():
     res["move selected"] = -1 # [-1, 0, 1] = [not selected, selected, confirmed]
     res["selected index"] = -2 # random value that isn't a possible index and not -1
     
-if __name__ == "__main__":
-    main()
+#if __name__ == "__main__":
+# Resource database kept as a global variable to allow for easy modification from
+# within functions
+res = {}
+main(res)
