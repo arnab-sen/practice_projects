@@ -11,3 +11,4 @@
 *.mp4
 *.lnk
 python/Lib/
+python/Scripts/nuitka
