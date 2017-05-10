@@ -13,8 +13,8 @@ def load_resources():
     res["green"] = (0, 255, 0)
     res["yellow"] = (255, 255, 0)
     res["blue"] = (0, 0, 255)
-    res["text_colour"] = res["black"]
-    res["anti_alias"] = True
+    res["text colour"] = res["black"]
+    res["anti alias"] = True
     res["size"] = 720, 480
     res["screen"] = pygame.display.set_mode(res["size"])
     number_of_pokemon = 2
@@ -22,10 +22,16 @@ def load_resources():
     pokemon_names = get_pokemon_names(pokemon_numbers)
     pokemon_1 = pokemon_numbers[0]
     pokemon_2 = pokemon_numbers[1]
+    
     res["my moves"] = get_moves(pokemon_names[0])
     res["opp moves"] = get_moves(pokemon_names[1])
-    all_moves = get_pokemon_info.get_dict("all_moves.txt")
+    res["all moves"] = get_pokemon_info.get_dict("all_moves.txt")
+    res["physical moves"] = get_pokemon_info.get_dict("physical_moves.txt")
+    res["special moves"] = get_pokemon_info.get_dict("special_moves.txt")
+    res["other moves"] = get_pokemon_info.get_dict("other_moves.txt")
     res["pokemon"] = create_pokemon(pokemon_numbers, [res["my moves"], res["opp moves"]])
+    p0 = res["pokemon"][0]
+    p1 = res["pokemon"][1]
     
     # Original size: 96 x 96, scaled size = 288, 288
     f2 = pygame.image.load("Resources\\bw-001n\\" + pokemon_2 + ".png")
@@ -72,7 +78,7 @@ def load_resources():
 
     res["move surfaces"] = []
     for move in res["my moves"]:
-        res["move surfaces"] += [get_move_surface(move, anti_alias, res["text colour"])]
+        res["move surfaces"] += [get_move_surface(move, res["anti alias"], res["text colour"])]
 
     res["quadrants"] = initialise_display()
     res["move selection pos"] = []
@@ -116,6 +122,17 @@ def create_pokemon(pokemon_numbers, moves):
         i += 1
 
     return pokemon
+
+def split_list(cols, linear_list):
+    temp_list = []
+    split_list = []
+    for i in range(len(linear_list)):
+        temp_list += [linear_list[i]]
+        if (i + 1) % cols == 0:
+            split_list += [temp_list]
+            temp_list = []
+
+    return split_list
 
 def get_opponent_position(opponent_number):
     # Find the bottom-most pixel in the middle column, and align
@@ -198,13 +215,55 @@ def state_machine():
     res["next state"] = next_state
 
 def show_moves():
-    pass
+    move_surfaces = res["move surfaces"]
+    quadrants = res["quadrants"]
+    screen = res["screen"]
+    moves_bar = res["moves bar"]
+    move_selection = res["move selection"]
+    moves = res["my moves"]
+    
+    screen.blit(moves_bar, (0, 337))
+    screen.blit(move_surfaces[0],(quadrants[0][0] + 30, quadrants[0][1] + 15))
+    screen.blit(move_surfaces[1],(quadrants[1][0] + 10, quadrants[1][1] + 15))
+    screen.blit(move_surfaces[2],(quadrants[2][0] + 30, quadrants[2][1] + 10))
+    screen.blit(move_surfaces[3],(quadrants[3][0] + 10, quadrants[3][1] + 10))
+
+    if res["selected index"] != -2:
+        screen.blit(move_selection, move_selection_pos[selected_index])
+
+        # Display move information
+        highlighted_move = moves[selected_index]
+        move_data = res["all moves"][highlighted_move]
+        move_type = move_data[0]
+        move_phys_spec = move_data[1]
+        move_power = move_data[3]
+        move_accuracy = move_data[4]
+        move_text = ["Power: " + str(move_power)]
+        #move_text += ["Type: " + move_type[0:4].upper() + "/" + move_phys_spec[0:3].upper()]
+        move_text += ["Type: "]            
+        move_text += ["Accuracy: " + str(move_accuracy) + "%"]
+        right_box = [res["font"].render(move_text[0] , anti_alias, text_colour)]
+        right_box += [res["font"].render(move_text[1] , anti_alias, text_colour)]
+        right_box += [res["font"].render(move_text[2] , anti_alias, text_colour)]
+        screen.blit(right_box[0],(505, 360))
+        screen.blit(right_box[1],(505, 395))
+        screen.blit(right_box[2],(505, 430))
+        screen.blit(type_icons[move_type],(573, 392))
+        screen.blit(type_icons[move_phys_spec],(641, 394))
+        
+        
+
+def get_opponent_move():
+    return res["opponent moves"][random.randrange(3)]
 
 def attack():
     pass
 
 def game_over():
     pass
+
+def update_screen():
+    screen = res["screen"]
 
 def main(resources):
     # Initialise
