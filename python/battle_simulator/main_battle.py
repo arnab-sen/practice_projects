@@ -404,7 +404,7 @@ def update_hp_bars():
                         str(pokemon[0].original_stats["HP"])]
     hp_text_message += [str(prev_hp[0]) + "/" + \
                         str(pokemon[1].original_stats["HP"])]
-    prev_hp = [pokemon[1].stats["HP"], pokemon[0].stats["HP"]]
+    res["prev hp"] = [pokemon[1].stats["HP"], pokemon[0].stats["HP"]]
     hp_text = [myfont.render(hp_text_message[0] , anti_alias, text_colour)]
     hp_text += [myfont.render(hp_text_message[1] , anti_alias, text_colour)]
     screen.blit(hp_text[1], (hp_colour_pos[0][0] + 80, hp_colour_pos[0][1] + 15))
