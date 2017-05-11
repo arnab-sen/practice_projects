@@ -8,9 +8,14 @@ from PIL import Image
 
 def load_resources():
     # State machine functions
-    res["show moves"] = show_moves
-    res["attack"] = attack
-    res["game over"] = game_over
+    res["show moves logic"] = show_moves_logic
+    res["show moves display"] = show_moves_display
+    res["first attack logic"] = attack_logic
+    res["first attack display"] = attack_display
+    res["second attack logic"] = attack_logic
+    res["second attack display"] = attack_display
+    res["game over logic"] = game_over_logic
+    res["game over display"] = game_over_display
     
     res["font"] = pygame.font.Font("Resources\\Pokemon Fonts\\pkmnrs.ttf", 30)
     res["black"] = (0, 0, 0)
@@ -209,7 +214,7 @@ def update_state_machine():
     current = res["game state"]
     if current == "start":
         next_state = "show moves"
-    elif current == "show moves" and res["current quadrant"] != -1:
+    elif current == "show moves" and res["selected index"] == res["current quadrant"]:
         next_state = "first attack"
     elif current == "first attack":
         next_state = "second attack"
@@ -218,16 +223,26 @@ def update_state_machine():
             next_state = "game over"
         else:
             next_state = "show moves"
+    else:
+        next_state = current
 
     return next_state
 
-def show_moves():
+def show_moves_logic():
+    if res["current quadrant"] != -1:
+        res["selected index"] = res["current quadrant"]
+
+def show_moves_display():
     move_surfaces = res["move surfaces"]
     quadrants = res["quadrants"]
     screen = res["screen"]
     moves_bar = res["moves bar"]
     move_selection = res["move selection"]
     moves = res["my moves"]
+    selected_index = res["selected index"]
+    anti_alias = res["anti alias"]
+    text_colour = res["text colour"]
+    type_icons = res["type icons"]
     
     screen.blit(moves_bar, (0, 337))
     screen.blit(move_surfaces[0],(quadrants[0][0] + 30, quadrants[0][1] + 15))
@@ -236,7 +251,7 @@ def show_moves():
     screen.blit(move_surfaces[3],(quadrants[3][0] + 10, quadrants[3][1] + 10))
 
     if res["selected index"] != -2:
-        screen.blit(move_selection, move_selection_pos[selected_index])
+        screen.blit(move_selection, res["move selection pos"][res["selected index"]])
 
         # Display move information
         highlighted_move = moves[selected_index]
@@ -258,15 +273,20 @@ def show_moves():
         screen.blit(type_icons[move_type],(573, 392))
         screen.blit(type_icons[move_phys_spec],(641, 394))
         
-        
 
 def get_opponent_move():
     return res["opponent moves"][random.randrange(3)]
 
-def attack():
+def attack_logic():
     pass
 
-def game_over():
+def attack_display():
+    pass
+
+def game_over_logic():
+    pass
+
+def game_over_display():
     pass
 
 def update_screen():
@@ -291,9 +311,7 @@ def update_screen():
     screen.blit(p1_name_text, name_text_pos[1])
     screen.blit(p0_name_text, name_text_pos[0])
 
-    # Activate the current state's function
-    res[res["game state"]]()
-
+def advance_frame():
     # update whole screen (use display.update(rectangle) to update
     # chosen rectangle portions of the screen to update
     pygame.display.flip()
@@ -322,8 +340,13 @@ def main(resources):
             elif event.type == pygame.MOUSEBUTTONUP:
                 mouse_position = pygame.mouse.get_pos()
                 res["current quadrant"] = mouse_in_quadrant(mouse_position, res["quadrants"])
-                res["game state"] = update_state_machine()   
+                res["game state"] = update_state_machine()
+                res[res["game state"] + " logic"]()
+
         update_screen()
+        res[res["game state"] + " display"]()
+
+        advance_frame()
   
 if __name__ == "__main__":
     res = {} # Resources dict kept as a global variable for easy access
