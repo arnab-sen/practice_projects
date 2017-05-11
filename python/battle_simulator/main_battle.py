@@ -471,6 +471,6 @@ def main(resources):
 
         advance_frame()
   
-if __name__ == "__main__":
-    res = {} # Resources dict kept as a global variable for easy access
-    main(res)
+#if __name__ == "__main__":
+res = {} # Resources dict kept as a global variable for easy access
+main(res)
