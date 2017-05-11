@@ -7,6 +7,11 @@ import battle, get_pokemon_info
 from PIL import Image
 
 def load_resources():
+    # State machine functions
+    res["show moves"] = show_moves
+    res["attack"] = attack
+    res["game over"] = game_over
+    
     res["font"] = pygame.font.Font("Resources\\Pokemon Fonts\\pkmnrs.ttf", 30)
     res["black"] = (0, 0, 0)
     res["red"] = (255, 0, 0)
@@ -36,6 +41,7 @@ def load_resources():
     # Original size: 96 x 96, scaled size = 288, 288
     f2 = pygame.image.load("Resources\\bw-001n\\" + pokemon_2 + ".png")
     pokemon_position = get_opponent_position(pokemon_2)
+    res["positions"] = [(60, 150), pokemon_position]
     f2 = pygame.transform.scale(f2, (192, 192))
     f1 = pygame.image.load("Resources\\bwback-001n\\" + pokemon_1 + ".png")
     f1 = pygame.transform.scale(f1, (288, 288))
@@ -63,8 +69,8 @@ def load_resources():
     res["hp widths"] = [144, 144]
     res["hp percent"] = [p0.stats["HP"] / p0.original_stats["HP"]]
     res["hp percent"] += [p1.stats["HP"] / p1.original_stats["HP"]]
-    res["my hp bar"] = {"colour" : "green", "width" : 144 * res["hp percent"][0]}
-    res["opp hp bar"] = {"colour" : "green", "width" : 144 * res["hp percent"][1]}
+    res["my hp bar status"] = {"colour" : "green", "width" : 144 * res["hp percent"][0]}
+    res["opp hp bar status"] = {"colour" : "green", "width" : 144 * res["hp percent"][1]}
     res["hp bars"] = [{
                         "green" : res["my green hp"], "yellow" : res["my yellow hp"],
                         "red" : res["my red hp"], "empty" : res["my empty hp"]
@@ -188,7 +194,7 @@ def mouse_in_quadrant(mouse_position, move_quadrants):
             return i
     return -1
 
-def state_machine():
+def update_state_machine():
     """
     Game states:
     State progression via mouse click (or specifically, mouse up)
@@ -198,6 +204,7 @@ def state_machine():
     Can call game state functions via the res dict, e.g.:
     res["game over"] = game_over
     res["game over"]()
+    Check if HP == 0 for either pokemon and if so, return game over and the winner
     """
     current = res["game state"]
     if current == "start":
@@ -212,7 +219,7 @@ def state_machine():
         else:
             next_state = "show moves"
 
-    res["next state"] = next_state
+    return next_state
 
 def show_moves():
     move_surfaces = res["move surfaces"]
@@ -264,6 +271,32 @@ def game_over():
 
 def update_screen():
     screen = res["screen"]
+    f2 = res["opp pokemon sprite"]
+    f1 = res["my pokemon sprite"]
+    p0 = res["pokemon"][0]
+    p1 = res["pokemon"][1]
+    
+    # Display background, pokemon, hp bars, and moves/battle text:
+    screen.fill(res["black"])
+    screen.blit(res["bg"], (0, 0))
+    screen.blit(f1, res["positions"][0])
+    screen.blit(f2, res["positions"][1])
+    screen.blit(res["my hp bar"], res["hp bars pos"][0])
+    screen.blit(res["opp hp bar"], res["hp bars pos"][1])
+
+    # Display pokemon names above their respective HP bars
+    p1_name_text = res["font"].render(p1.name, True, res["text colour"])
+    p0_name_text = res["font"].render(p0.name, True, res["text colour"])
+    name_text_pos = [(420, 236), (55, 54)]
+    screen.blit(p1_name_text, name_text_pos[1])
+    screen.blit(p0_name_text, name_text_pos[0])
+
+    # Activate the current state's function
+    res[res["game state"]]()
+
+    # update whole screen (use display.update(rectangle) to update
+    # chosen rectangle portions of the screen to update
+    pygame.display.flip()
 
 def main(resources):
     # Initialise
@@ -273,8 +306,8 @@ def main(resources):
     load_resources()
     p0 = res["pokemon"][0]
     p1 = res["pokemon"][1]
-    res["game state"] = "start"
-    #res["game state"] = "show_moves"
+    #res["game state"] = "start"
+    res["game state"] = "show moves"
     res["game over"] = False
     res["my turn"] = True
     res["exit game"] = False
@@ -289,6 +322,8 @@ def main(resources):
             elif event.type == pygame.MOUSEBUTTONUP:
                 mouse_position = pygame.mouse.get_pos()
                 res["current quadrant"] = mouse_in_quadrant(mouse_position, res["quadrants"])
+                res["game state"] = update_state_machine()   
+        update_screen()
   
 if __name__ == "__main__":
     res = {} # Resources dict kept as a global variable for easy access
