@@ -1,6 +1,6 @@
 """
 Sen is a Python-based programming language developed by Arnab Sen.
-Currently this is for educational purposes only.
+This is currently for educational purposes only.
 
 TODO:
 - Check if "=" is in a string, if not then do the variable assignment
