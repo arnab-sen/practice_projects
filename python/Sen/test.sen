@@ -1,6 +1,7 @@
+hw = "Hello world"
 disp("Hello world")
 disp(12345)
 variable_1 = 5
 disp(variable_1)
-variable_2 = true
+variable_2 = true      
 disp(variable_2)

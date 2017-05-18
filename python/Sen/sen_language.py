@@ -28,7 +28,8 @@ def interpret_script(script, functions):
                 if args in variables:
                     args = variables[args]
                 else:
-                    variables[args] = type_cast(args)
+                    args = type_cast(args)
+                    variables[str(args)] = args
                     
                 function_name = l[:bracket]
                 #print(function_name)
@@ -40,6 +41,8 @@ def interpret_script(script, functions):
                 var_name = line[:line.find("=")]
                 assignment = line[line.find("=") + 1:]
                 variables[var_name.strip()] = type_cast(assignment)
+
+    print(variables)
             
 
 def type_cast(string):
