@@ -9,6 +9,7 @@ BLACK = 0, 0, 0
 ANTI_ALIAS = True
 SIZE = 720, 480
 screen = pygame.display.set_mode(SIZE)
+TILE_MOVEMENT = 15
 
 def location(filename):
     return "Resources\\Overworld\\" + filename
@@ -38,12 +39,15 @@ def load_resources():
     res["map"] = res["pallet town"]
     res["map pos"] = [0, 0]
     mc = {}
-    mc["fw"] = []
+    mc["down"], mc["up"], mc["left"], mc["right"] = [], [], [], []
     res["mc"] = mc
-    for i in range(3):
-        res["mc"]["fw"].append(load_image("mc fw " + str(i)))
-    res["mc pos"] = [100, 100]
-    res["mc current"] = res["mc"]["fw"]
+    for i in range(4):
+        res["mc"]["down"].append(load_image("mc down " + str(i)))
+        res["mc"]["up"].append(load_image("mc up " + str(i)))
+        res["mc"]["left"].append(load_image("mc left " + str(i)))
+        res["mc"]["right"].append(load_image("mc right " + str(i)))
+    res["mc pos"] = [SIZE[0] / 2 - 21, SIZE[1] / 2 - 28]
+    res["mc current"] = res["mc"]["down"]
     res["mc frame"] = 0
     
 def update_screen():
@@ -63,9 +67,21 @@ def play():
                 pygame.display.quit()
                 sys.exit()
         if event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
+                res["mc current"] = res["mc"]["down"]
                 res["mc frame"] = (res["mc frame"] + 1) % len(res["mc current"])
-                #res["mc pos"][1] += 10
-                res["map pos"][1] -= 10
+                res["map pos"][1] -= TILE_MOVEMENT
+        elif event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
+                res["mc current"] = res["mc"]["left"]
+                res["mc frame"] = (res["mc frame"] + 1) % len(res["mc current"])
+                res["map pos"][0] += TILE_MOVEMENT
+        elif event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
+                res["mc current"] = res["mc"]["right"]
+                res["mc frame"] = (res["mc frame"] + 1) % len(res["mc current"])
+                res["map pos"][0] -= TILE_MOVEMENT
+        elif event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
+                res["mc current"] = res["mc"]["up"]
+                res["mc frame"] = (res["mc frame"] + 1) % len(res["mc current"])
+                res["map pos"][1] += TILE_MOVEMENT
 
         update_screen()
         advance_frame()
