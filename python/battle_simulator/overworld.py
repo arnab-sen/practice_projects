@@ -24,7 +24,7 @@ def load_image(name):
     image = Image.open(location(name + ".png"))
     image = scale_image(3, image)
     image_data = image.tobytes(), image.size, image.mode
-    res[name] = pygame.image.fromstring(*image_data)
+    return pygame.image.fromstring(*image_data)
 
 def load_character(character_name):
     pass
@@ -34,27 +34,42 @@ def load_resources():
     image = Image.open(location("pallet town.png"))
     image = scale_image(3, image)
     image_data = image.tobytes(), image.size, image.mode
-    load_image("pallet town")
-    load_image("mc fw neutral")
-
+    res["pallet town"] = load_image("pallet town")
+    res["map"] = res["pallet town"]
+    res["map pos"] = [0, 0]
+    mc = {}
+    mc["fw"] = []
+    res["mc"] = mc
+    for i in range(3):
+        res["mc"]["fw"].append(load_image("mc fw " + str(i)))
+    res["mc pos"] = [100, 100]
+    res["mc current"] = res["mc"]["fw"]
+    res["mc frame"] = 0
+    
 def update_screen():
     screen.fill(BLACK)
-    screen.blit(res["pallet town"], (0, 0))
-    screen.blit(res["mc fw neutral"], (200, 100))
+    screen.blit(res["map"], res["map pos"])
+    screen.blit(res["mc current"][res["mc frame"]], res["mc pos"])
 
 def advance_frame():
     pygame.display.flip()
 
 def play():
     load_resources()
-    update_screen()
-    advance_frame()
-    
+
     while 1:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.display.quit()
                 sys.exit()
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_DOWN:
+                res["mc frame"] = (res["mc frame"] + 1) % len(res["mc current"])
+                #res["mc pos"][1] += 10
+                res["map pos"][1] -= 10
+
+        update_screen()
+        advance_frame()
+        pygame.time.Clock().tick(10)
 
 play()
     
