@@ -9,6 +9,7 @@ TILE_SIZE = (TILE_SIZE_ORIGINAL[0] * 3, TILE_SIZE_ORIGINAL[1] * 3)
 TILE_DIM = TILE_SIZE[0]
 TEST_OPEN_PATH = "Resources\\Overworld\\Tiles\\Input\\"
 TEST_SAVE_PATH = "Resources\\Overworld\\Tiles\\Saved\\"
+maps = {}
 
 def scale_image(scale, image):
     width, height = image.size
@@ -17,38 +18,58 @@ def scale_image(scale, image):
     return image
 
 def get_map(filename):
-    filename += ".png"
-    image = Image.open(TEST_OPEN_PATH + filename)
+    image = Image.open(TEST_OPEN_PATH + filename + ".png")
+    maps["current"] = filename
+    maps[filename] = {}
+    image = scale_image(3, image)
+    maps[filename]["tiles per row"] = round(image.size[0] / TILE_SIZE[0])
+    maps[filename]["tiles per col"] = round(image.size[1] / TILE_SIZE[1])
+    maps[filename]["dimensions"] = image.size
 
-    return scale_image(3, image)
+    return image
 
 def make_tiles(image):
     tiles = []
     tile_pos = [0, 0]
-    tiles_per_row = round(image.size[0] / TILE_SIZE[0])
+    current_map = maps["current"]
     crop_pos = [0, 0, *TILE_SIZE]
-    # Get the first row
-    for tile in range(tiles_per_row):
-        crop_pos[0] = (TILE_DIM * tile)
-        crop_pos[2] = crop_pos[0] + TILE_DIM
-        print(tuple(crop_pos))
-        tiles.append(image.crop(crop_pos))
+    for depth in range(maps[current_map]["tiles per col"]):
+        crop_pos[1] = (TILE_DIM * depth)
+        crop_pos[3] = crop_pos[1] + TILE_DIM
+        for tile in range(maps[current_map]["tiles per row"]):
+            crop_pos[0] = (TILE_DIM * tile)
+            crop_pos[2] = crop_pos[0] + TILE_DIM
+            print(tuple(crop_pos))
+            tiles.append(image.crop(crop_pos))
 
     return tiles
 
-def save_tiles(tiles, filename):
+def split_list(cols, linear_list):
+    temp_list = []
+    split_list = []
+    for i in range(len(linear_list)):
+        temp_list += [linear_list[i]]
+        if (i + 1) % cols == 0:
+            split_list += [temp_list]
+            temp_list = []
+
+    return split_list
+
+def save_tiles(tiles):
+    tiles_per_row = maps[maps["current"]]["tiles per row"]
+    tiles = split_list(tiles_per_row, tiles)
     
-    #for tile in tiles:
-    #    tile.save(TEST_SAVE_PATH + filename)
-    for i, tile in enumerate(tiles):
-        tile.save(TEST_SAVE_PATH + filename + " " + str(i) + ".png")
-    #tiles[0].save(TEST_SAVE_PATH + filename + " " + str(i) + ".png")
+    for i in range(len(tiles)):
+        for j in range(tiles_per_row):
+            name = TEST_SAVE_PATH
+            name += maps["current"] + " [{}, {}].png".format(str(i), str(j))
+            tiles[i][j].save(name)
 
 def main():
     filename = "pallet town"
     image = get_map(filename)
     tiles = make_tiles(image)
-    save_tiles(tiles, filename)
+    save_tiles(tiles)
 
 if __name__ == "__main__":
     main()
