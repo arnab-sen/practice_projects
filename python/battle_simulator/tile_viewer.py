@@ -124,7 +124,11 @@ def get_tile_states(rows, cols):
         map_info["tile states"] = [[0] * rows for i in range(cols)]
     else:
         with open(PATH + filename) as file:
-            map_info["tile states"] = ast.literal_eval(file.read())
+            states = ast.literal_eval(file.read())
+
+    map_info["tile states"] = states
+    
+    return states
 
 def save_tile_states():
     """
@@ -147,11 +151,15 @@ def save_tile_states():
     filename += "/" + filename + ".txt"
     with open(PATH + filename, "w") as file:
         file.write(tile_states_string)
+
+def initialise(tiles_folder):
+    tiles_folder = "pallet town"
+    map_info["current"] = tiles_folder
     
 def play():
     #tiles_folder = input("Enter your tiles folder name: ")
-    tiles_folder = "pallet town"
-    map_info["current"] = tiles_folder
+    initialise("pallet town")
+    tiles_folder = map_info["current"]
     
     rows, cols = tiles_per_row, tiles_per_col = get_base(tiles_folder)
     tile_info = [tiles_folder, tiles_per_row, tiles_per_col]
@@ -181,4 +189,5 @@ def play():
         update_screen(tiles)
         advance_frame()
 
-play()
+if __name__ == "__main__":
+    play()
