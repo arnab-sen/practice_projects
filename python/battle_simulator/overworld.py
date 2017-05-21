@@ -80,11 +80,14 @@ def move_sprite(direction):
         res["mc tile"][map_index] -= map_movement
         res["mc frame"] = (res["mc frame"] + 1) % len(res["mc current"])
         res["map pos"][map_index] += map_movement * TILE_MOVEMENT  
-        update_screen()
-        advance_frame()
+        if res["animate"]:
+            update_screen()
+            advance_frame()
         pygame.time.Clock().tick(10)
         res["map pos"][map_index] += map_movement * TILE_MOVEMENT 
-        res["mc frame"] = (res["mc frame"] + 1) % len(res["mc current"])    
+        res["mc frame"] = (res["mc frame"] + 1) % len(res["mc current"])
+
+    #print(res["map pos"])
 
 def load_resources():
     #res["pallet town"] = pygame.image.load(location("pallet town.png"))
@@ -122,15 +125,32 @@ def update_screen():
 def advance_frame():
     pygame.display.flip()
 
+def reposition(movement_sequence):
+    directions = {
+                    "l" : "left",
+                    "r" : "right",
+                    "u" : "up",
+                    "d" : "down"
+                    }
+    
+    for direction in movement_sequence:
+            move_sprite(directions[direction])
+            
+    res["animate"] = True
+
 def play():
     load_resources()
     #res["moving"] = False
+    res["animate"] = False
+    reposition("lddd")
 
     while 1:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.display.quit()
                 sys.exit()
+                
+        
 
         button_press = (event.type == pygame.KEYDOWN)
         if button_press and event.key == pygame.K_DOWN:
