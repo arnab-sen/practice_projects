@@ -13,6 +13,8 @@ screen = pygame.display.set_mode(SIZE)
 SCALE = 3
 TILE_DIM = 16 * SCALE
 TILE_MOVEMENT = TILE_DIM // 2
+A_BUTTON = K_a
+B_BUTTON = K_s
 
 def location(filename):
     #return "Resources\\Overworld\\" + filename
@@ -74,8 +76,9 @@ def move_sprite(direction):
     print("Current tile state:", res["tile states"][x][y])
     print("Move to tile state:", res["tile states"][i][j])
     """
-    
-    if res["tile states"][move_to_tile[1]][move_to_tile[0]] == 0:
+
+    tile_state = res["tile states"][move_to_tile[1]][move_to_tile[0]]
+    if tile_state == 0:
         #print("Currently at tile {}".format(res["mc tile"]))
         res["mc tile"][map_index] -= map_movement
         res["mc frame"] = (res["mc frame"] + 1) % len(res["mc current"])
@@ -86,6 +89,10 @@ def move_sprite(direction):
         pygame.time.Clock().tick(10)
         res["map pos"][map_index] += map_movement * TILE_MOVEMENT 
         res["mc frame"] = (res["mc frame"] + 1) % len(res["mc current"])
+        
+        return "default"
+    elif tile_state == 1: return "collide"    
+    elif tile_state == 2: return "interact"      
 
     #print(res["map pos"])
 
@@ -112,6 +119,7 @@ def load_resources():
     place_at(*res["mc tile"])
     #place_at(3, 3)
     res["mc current"] = res["mc"]["down"]
+    res["last direction"] = "down"
     res["mc frame"] = 0
     tile_viewer.initialise(res["current map name"])
     rows, cols = tile_viewer.get_base(res["current map name"])
@@ -138,9 +146,29 @@ def reposition(movement_sequence):
             
     res["animate"] = True
 
+def interact(text):
+    """
+    Interact by facing an interact tile and pressing A,
+    display text on valid interaction
+    """
+    tile_state = move_sprite(direction)
+    if tile_state == "interact":
+        display_speech_text(text)
+
+def display_speech_text(text):
+    """
+    * Will display a pygame Surface containing the input text,
+      allowing for scrolling/advancing through text with the A
+      or B keys
+    * The speech_surfaces output is a list containing all the
+      speech boxes required to show all the text
+    """
+    speech_surfaces = []
+
+    return speech_surfaces
+
 def play():
     load_resources()
-    #res["moving"] = False
     res["animate"] = False
     reposition("lddd")
 
@@ -149,26 +177,30 @@ def play():
             if event.type == pygame.QUIT:
                 pygame.display.quit()
                 sys.exit()
-                
-        
 
         button_press = (event.type == pygame.KEYDOWN)
         if button_press and event.key == pygame.K_DOWN:
             direction = "down"
+            res["last direction"] = direction
             res["mc current"] = res["mc"][direction]
             move_sprite(direction)
         elif button_press and event.key == pygame.K_LEFT:
             direction = "left"
+            res["last direction"] = direction
             res["mc current"] = res["mc"][direction]
             move_sprite(direction)
         elif button_press and event.key == pygame.K_RIGHT:
             direction = "right"
+            res["last direction"] = direction
             res["mc current"] = res["mc"][direction]
             move_sprite(direction)
         elif button_press and event.key == pygame.K_UP:
             direction = "up"
+            res["last direction"] = direction
             res["mc current"] = res["mc"][direction]
             move_sprite(direction)
+        elif button_press and event.key == A_BUTTON:
+            interact("This is an interactable object!")
 
         update_screen()
         advance_frame()
