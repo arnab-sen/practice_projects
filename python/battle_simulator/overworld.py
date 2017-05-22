@@ -9,7 +9,7 @@ res = {}
 BLACK = 0, 0, 0
 ANTI_ALIAS = True
 SIZE = 720, 480
-screen = pygame.display.set_mode(SIZE)
+screen = ""
 SCALE = 3
 TILE_DIM = 16 * SCALE
 TILE_MOVEMENT = TILE_DIM // 2
@@ -97,6 +97,11 @@ def move_sprite(direction):
     #print(res["map pos"])
 
 def load_resources():
+    pygame.display.set_caption("Pokemon World")
+    window_icon = Image.open("Resources/pokemon world icon.png")
+    pygame.display.set_icon(window_icon)
+    screen = pygame.display.set_mode(SIZE)
+
     #res["pallet town"] = pygame.image.load(location("pallet town.png"))
     res["current map name"] = "pallet town"
     image = Image.open(location("pallet town.png"))
