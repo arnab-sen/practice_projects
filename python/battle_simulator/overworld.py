@@ -9,12 +9,12 @@ res = {}
 BLACK = 0, 0, 0
 ANTI_ALIAS = True
 SIZE = 720, 480
-screen = ""
+screen = pygame.display.set_mode(SIZE)
 SCALE = 3
 TILE_DIM = 16 * SCALE
 TILE_MOVEMENT = TILE_DIM // 2
-A_BUTTON = K_a
-B_BUTTON = K_s
+A_BUTTON = pygame.K_a
+B_BUTTON = pygame.K_s
 
 def location(filename):
     #return "Resources\\Overworld\\" + filename
@@ -98,9 +98,9 @@ def move_sprite(direction):
 
 def load_resources():
     pygame.display.set_caption("Pokemon World")
-    window_icon = Image.open("Resources/pokemon world icon.png")
+    window_icon = pygame.image.load("Resources/pokemon world icon.png")
     pygame.display.set_icon(window_icon)
-    screen = pygame.display.set_mode(SIZE)
+    #screen = pygame.display.set_mode(SIZE)
 
     #res["pallet town"] = pygame.image.load(location("pallet town.png"))
     res["current map name"] = "pallet town"
@@ -140,10 +140,10 @@ def advance_frame():
 
 def reposition(movement_sequence):
     directions = {
-                    "l" : "left",
-                    "r" : "right",
                     "u" : "up",
-                    "d" : "down"
+                    "d" : "down",
+                    "l" : "left",
+                    "r" : "right"
                     }
     
     for direction in movement_sequence:
