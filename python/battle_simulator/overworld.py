@@ -78,7 +78,7 @@ def move_sprite(direction):
     """
 
     tile_state = res["tile states"][move_to_tile[1]][move_to_tile[0]]
-    if tile_state == 0:
+    if tile_state == 0 and res["current button"] == "arrow":
         #print("Currently at tile {}".format(res["mc tile"]))
         res["mc tile"][map_index] -= map_movement
         res["mc frame"] = (res["mc frame"] + 1) % len(res["mc current"])
@@ -125,17 +125,27 @@ def load_resources():
     #place_at(3, 3)
     res["mc current"] = res["mc"]["down"]
     res["last direction"] = "down"
+    res["current direction"] = "down"
     res["mc frame"] = 0
     tile_viewer.initialise(res["current map name"])
     rows, cols = tile_viewer.get_base(res["current map name"])
     res["tile states"] = tile_viewer.get_tile_states(rows, cols)
+    res["text bar"] = pygame.image.load("Resources/text_bar.png")
+    res["show text"] = False
+    res["current button"] = "arrow"
     
 def update_screen():
     screen.fill(BLACK)
     screen.blit(res["map"], res["map pos"])
     screen.blit(res["mc current"][res["mc frame"]], res["mc pos"])
+    
+    if res["current direction"] == res["last direction"] and res["show text"]:
+        screen.blit(res["text bar"], (0, 337))
+    else:
+        res["show text"] = False
 
 def advance_frame():
+    #screen.blit(res["text bar"], (0, 0))
     pygame.display.flip()
 
 def reposition(movement_sequence):
@@ -156,7 +166,8 @@ def interact(text):
     Interact by facing an interact tile and pressing A,
     display text on valid interaction
     """
-    tile_state = move_sprite(direction)
+    tile_state = move_sprite(res["current direction"])
+    res["last direction"] = res["current direction"]
     if tile_state == "interact":
         display_speech_text(text)
 
@@ -169,6 +180,8 @@ def display_speech_text(text):
       speech boxes required to show all the text
     """
     speech_surfaces = []
+    #screen.blit(res["text bar"], (0, 0))
+    res["show text"] = True
 
     return speech_surfaces
 
@@ -185,26 +198,35 @@ def play():
 
         button_press = (event.type == pygame.KEYDOWN)
         if button_press and event.key == pygame.K_DOWN:
+            res["current button"] = "arrow"
             direction = "down"
-            res["last direction"] = direction
+            res["last direction"] = res["current direction"]
+            res["current direction"] = direction
             res["mc current"] = res["mc"][direction]
             move_sprite(direction)
         elif button_press and event.key == pygame.K_LEFT:
+            res["current button"] = "arrow"
             direction = "left"
-            res["last direction"] = direction
+            res["last direction"] = res["current direction"]
+            res["current direction"] = direction
             res["mc current"] = res["mc"][direction]
             move_sprite(direction)
         elif button_press and event.key == pygame.K_RIGHT:
+            res["current button"] = "arrow"
             direction = "right"
-            res["last direction"] = direction
+            res["last direction"] = res["current direction"]
+            res["current direction"] = direction
             res["mc current"] = res["mc"][direction]
             move_sprite(direction)
         elif button_press and event.key == pygame.K_UP:
+            res["current button"] = "arrow"
             direction = "up"
-            res["last direction"] = direction
+            res["last direction"] = res["current direction"]
+            res["current direction"] = direction
             res["mc current"] = res["mc"][direction]
             move_sprite(direction)
         elif button_press and event.key == A_BUTTON:
+            res["current button"] = "A"
             interact("This is an interactable object!")
 
         update_screen()
