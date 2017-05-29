@@ -16,12 +16,13 @@ import random
 class Pokemon:
 
     def __init__(self, name, moves, stats):
-        self._name = name
-        self._moves = moves
+        self.name = name
+        self.moves = moves
         #print(stats[0], type(stats[0]))
         # Stats based on:
         # https://pokemondb.net/pokebase/200194/how-do-base-stats-work
-        self._original_stats = {
+        
+        self.original_stats = {
                                     "HP" : stats[0] * 2 + 110,
                                     "ATK" : stats[1] * 2 + 5,
                                     "DEF" : stats[2] * 2 + 5,
@@ -30,7 +31,7 @@ class Pokemon:
                                     "SPEED" : stats[5] * 2 + 5
                                }
 
-        self._stats = {
+        self.stats = {
                             "HP" : stats[0] * 2 + 110,
                             "ATK" : stats[1] * 2 + 5,
                             "DEF" : stats[2] * 2 + 5,
@@ -38,34 +39,7 @@ class Pokemon:
                             "SP.DEF" : stats[4] * 2 + 5,
                             "SPEED" : stats[5] * 2 + 5
                       }
-            
-        
-    def set_name(self, value):
-        self._name = value
 
-    def get_name(self):
-        return self._name
-
-    def set_moves(self, value):
-        self._moves = value
-
-    def get_moves(self):
-        return self._moves
-        
-    def get_original_stats(self):
-        return self._original_stats
-
-    def set_stats(self, stat_and_value):
-        stat, value = stat_and_value
-        self._stats[stat] = value
-
-    def get_stats(self):
-        return self._stats    
-
-    name = property(get_name, set_name)
-    moves = property(get_moves, set_moves)    
-    original_stats = property(get_original_stats)
-    stats = property(get_stats, set_stats)
 
 def get_pokemon_names():
     return get_pokemon_info.get_dict("numbered_pokemon.txt")
