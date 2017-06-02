@@ -3,7 +3,7 @@
 
 import sys, pygame, time
 from PIL import Image
-import tile_viewer
+import tile_viewer, interactive_objects
 
 res = {}
 BLACK = 0, 0, 0
@@ -228,6 +228,9 @@ def play():
         elif button_press and event.key == A_BUTTON:
             res["current button"] = "A"
             interact("This is an interactable object!")
+        elif button_press and event.key == B_BUTTON:
+            res["current button"] = "B"
+            res["show text"] = False
 
         update_screen()
         advance_frame()
