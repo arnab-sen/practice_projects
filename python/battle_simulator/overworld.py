@@ -37,6 +37,44 @@ def load_image(name):
 def load_character(character_name):
     pass
 
+def load_resources():
+    pygame.display.set_caption("Pokemon World")
+    window_icon = pygame.image.load("Resources/pokemon world icon.png")
+    pygame.display.set_icon(window_icon)
+    #screen = pygame.display.set_mode(SIZE)
+
+    #res["pallet town"] = pygame.image.load(location("pallet town.png"))
+    res["current map name"] = "pallet town"
+    image = Image.open(location("pallet town.png"))
+    image = scale_image(3, image)
+    image_data = image.tobytes(), image.size, image.mode
+    res["pallet town"] = load_image("pallet town")
+    res["map"] = res["pallet town"]
+    res["map pos"] = [0, 0]
+    mc = {}
+    mc["down"], mc["up"], mc["left"], mc["right"] = [], [], [], []
+    res["mc"] = mc
+    for i in range(4):
+        res["mc"]["down"].append(load_image("mc down " + str(i)))
+        res["mc"]["up"].append(load_image("mc up " + str(i)))
+        res["mc"]["left"].append(load_image("mc left " + str(i)))
+        res["mc"]["right"].append(load_image("mc right " + str(i)))
+    #res["mc pos"] = [SIZE[0] / 2 - 21, SIZE[1] / 2 - 28]
+    #place_at(7, 5)
+    res["mc tile"] = [SIZE[0] // 2 // TILE_DIM, SIZE[1] // 2 // TILE_DIM]
+    place_at(*res["mc tile"])
+    #place_at(3, 3)
+    res["mc current"] = res["mc"]["down"]
+    res["last direction"] = "down"
+    res["current direction"] = "down"
+    res["mc frame"] = 0
+    tile_viewer.initialise(res["current map name"])
+    rows, cols = tile_viewer.get_base(res["current map name"])
+    res["tile states"] = tile_viewer.get_tile_states(rows, cols)
+    res["text bar"] = pygame.image.load("Resources/text_bar.png")
+    res["show text"] = False
+    res["current button"] = "arrow"
+
 def place_at(tile_row, tile_col):
     """
     Player/NPC sprite offset from the tile it's on:
@@ -82,12 +120,17 @@ def move_sprite(direction):
         #print("Currently at tile {}".format(res["mc tile"]))
         res["mc tile"][map_index] -= map_movement
         res["mc frame"] = (res["mc frame"] + 1) % len(res["mc current"])
-        res["map pos"][map_index] += map_movement * TILE_MOVEMENT  
-        if res["animate"]:
-            update_screen()
-            advance_frame()
-        pygame.time.Clock().tick(10)
-        res["map pos"][map_index] += map_movement * TILE_MOVEMENT 
+        #res["map pos"][map_index] += map_movement * TILE_MOVEMENT
+        sm = None #10
+        smooth_map_movement(map_index, map_movement, smoothness = sm)
+        
+        #if res["animate"]:
+        #    update_screen()
+        #    advance_frame()
+        # Restrict frames
+        pygame.time.Clock().tick(48)
+        #res["map pos"][map_index] += map_movement * TILE_MOVEMENT
+        smooth_map_movement(map_index, map_movement, smoothness = sm)
         res["mc frame"] = (res["mc frame"] + 1) % len(res["mc current"])
         
         return "default"
@@ -96,43 +139,18 @@ def move_sprite(direction):
 
     #print(res["map pos"])
 
-def load_resources():
-    pygame.display.set_caption("Pokemon World")
-    window_icon = pygame.image.load("Resources/pokemon world icon.png")
-    pygame.display.set_icon(window_icon)
-    #screen = pygame.display.set_mode(SIZE)
-
-    #res["pallet town"] = pygame.image.load(location("pallet town.png"))
-    res["current map name"] = "pallet town"
-    image = Image.open(location("pallet town.png"))
-    image = scale_image(3, image)
-    image_data = image.tobytes(), image.size, image.mode
-    res["pallet town"] = load_image("pallet town")
-    res["map"] = res["pallet town"]
-    res["map pos"] = [0, 0]
-    mc = {}
-    mc["down"], mc["up"], mc["left"], mc["right"] = [], [], [], []
-    res["mc"] = mc
-    for i in range(4):
-        res["mc"]["down"].append(load_image("mc down " + str(i)))
-        res["mc"]["up"].append(load_image("mc up " + str(i)))
-        res["mc"]["left"].append(load_image("mc left " + str(i)))
-        res["mc"]["right"].append(load_image("mc right " + str(i)))
-    #res["mc pos"] = [SIZE[0] / 2 - 21, SIZE[1] / 2 - 28]
-    #place_at(7, 5)
-    res["mc tile"] = [SIZE[0] // 2 // TILE_DIM, SIZE[1] // 2 // TILE_DIM]
-    place_at(*res["mc tile"])
-    #place_at(3, 3)
-    res["mc current"] = res["mc"]["down"]
-    res["last direction"] = "down"
-    res["current direction"] = "down"
-    res["mc frame"] = 0
-    tile_viewer.initialise(res["current map name"])
-    rows, cols = tile_viewer.get_base(res["current map name"])
-    res["tile states"] = tile_viewer.get_tile_states(rows, cols)
-    res["text bar"] = pygame.image.load("Resources/text_bar.png")
-    res["show text"] = False
-    res["current button"] = "arrow"
+def smooth_map_movement(map_index, map_movement, smoothness = None):
+    move = TILE_MOVEMENT
+    if not smoothness: smoothness = 10
+    increment = move // smoothness
+    remainder = move % smoothness
+    
+    for i in range(1, smoothness + 1):
+        res["map pos"][map_index] += map_movement * increment
+        update_screen()
+        advance_frame()
+    res["map pos"][map_index] += map_movement * remainder
+   
     
 def update_screen():
     screen.fill(BLACK)
@@ -143,6 +161,9 @@ def update_screen():
         screen.blit(res["text bar"], (0, 337))
     else:
         res["show text"] = False
+
+    if not res["animate"]:
+        screen.fill(BLACK)
 
 def advance_frame():
     #screen.blit(res["text bar"], (0, 0))
@@ -197,7 +218,9 @@ def play():
                 sys.exit()
 
         button_press = (event.type == pygame.KEYDOWN)
-        if button_press and event.key == pygame.K_DOWN:
+        keys = pygame.key.get_pressed()
+        #if button_press and event.key == pygame.K_DOWN:
+        if keys[pygame.K_DOWN]:
             res["current button"] = "arrow"
             direction = "down"
             res["last direction"] = res["current direction"]
