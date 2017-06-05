@@ -121,17 +121,18 @@ def move_sprite(direction):
         res["mc tile"][map_index] -= map_movement
         res["mc frame"] = (res["mc frame"] + 1) % len(res["mc current"])
         #res["map pos"][map_index] += map_movement * TILE_MOVEMENT
-        sm = None #10
+        sm = 10
         smooth_map_movement(map_index, map_movement, smoothness = sm)
         
         #if res["animate"]:
         #    update_screen()
         #    advance_frame()
         # Restrict frames
-        pygame.time.Clock().tick(48)
         #res["map pos"][map_index] += map_movement * TILE_MOVEMENT
-        smooth_map_movement(map_index, map_movement, smoothness = sm)
         res["mc frame"] = (res["mc frame"] + 1) % len(res["mc current"])
+        smooth_map_movement(map_index, map_movement, smoothness = sm)
+        pygame.time.Clock().tick(30)
+        
         
         return "default"
     elif tile_state == 1: return "collide"    
@@ -259,7 +260,7 @@ def play():
         advance_frame()
         
         # Restrict framerate
-        pygame.time.Clock().tick(10)
+        #pygame.time.Clock().tick(10)
 
 play()
     
