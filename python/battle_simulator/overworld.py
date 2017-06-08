@@ -74,8 +74,26 @@ def load_resources():
     res["text bar"] = pygame.image.load("Resources/text_bar.png")
     res["show text"] = False
     res["current button"] = "arrow"
+    
+    get_NPC_list()
 
-def place_at(tile_row, tile_col):
+def get_NPC_list():
+    # Open txt file in the current map's folder and read in
+    # the list of NPCs on the current map, then use add_NPC
+    # while looping through the list
+    #pass
+
+    # Testing with Prof. Oak:
+    res["Oak"] = add_NPC("Oak", "Hello!", tile = (5, 5))
+    
+
+def add_NPC(name, text, tile):
+    npc = interactive_objects.NPC(name, text)
+    place_at(tile[0], tile[1], name = name)
+    
+    return npc
+
+def place_at(tile_row, tile_col, name = None):
     """
     Player/NPC sprite offset from the tile it's on:
     * Let tile top left be 0, 0
@@ -85,7 +103,11 @@ def place_at(tile_row, tile_col):
     tile_pos = i * TILE_DIM - res["map pos"][0], j * TILE_DIM - res["map pos"][1]
     offset = -1 * SCALE, -4 * SCALE
 
-    res["mc pos"] = [tile_pos[0] + offset[0], tile_pos[1] + offset[1]]
+    if not name:
+        res["mc pos"] = [tile_pos[0] + offset[0], tile_pos[1] + offset[1]]
+    else:
+        res[name + " pos"] = [tile_pos[0] + offset[0], tile_pos[1] + offset[1]]
+        # add NPC to collection of NPCs on the current map
 
 def move_sprite(direction):
     if direction == "down":
@@ -165,6 +187,8 @@ def update_screen():
 
     if not res["animate"]:
         screen.fill(BLACK)
+
+    screen.blit(res["Oak"].sprites["D"][0], res["Oak pos"])
 
 def advance_frame():
     #screen.blit(res["text bar"], (0, 0))
