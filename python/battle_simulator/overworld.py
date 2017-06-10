@@ -3,7 +3,7 @@
 
 import sys, pygame, time
 from PIL import Image
-import tile_viewer, interactive_objects
+import tile_viewer, interactive_objects, pw_utils
 
 res = {}
 BLACK = 0, 0, 0
@@ -38,6 +38,7 @@ def load_character(character_name):
     pass
 
 def load_resources():
+    pygame.init()
     pygame.display.set_caption("Pokemon World")
     window_icon = pygame.image.load("Resources/pokemon world icon.png")
     pygame.display.set_icon(window_icon)
@@ -74,6 +75,7 @@ def load_resources():
     res["text bar"] = pygame.image.load("Resources/text_bar.png")
     res["show text"] = False
     res["current button"] = "arrow"
+    res["font"] = pygame.font.Font("Resources/Pokemon Fonts/pkmnrs.ttf", 30)
     
     get_NPC_list()
 
@@ -82,14 +84,18 @@ def get_NPC_list():
     # the list of NPCs on the current map, then use add_NPC
     # while looping through the list
     #pass
+    res["NPCs"] = []
 
     # Testing with Prof. Oak:
-    res["Oak"] = add_NPC("Oak", "Hello!", tile = (5, 8))
-    
+    res["Oak"] = add_NPC("Oak", tile = (5, 8))
+    res["NPCs"].append(res["Oak"])
 
-def add_NPC(name, text, tile):
-    npc = interactive_objects.NPC(name, text)
-    place_at(tile[0], tile[1], name = name)
+def add_NPC(name, tile):
+    npc = interactive_objects.NPC(name)
+    # Load NPC dialogue from txt file
+    pw_utils.get_NPC_dialogue("base", npc)
+    npc.at_tile = tile
+    place_at(*tile, name = npc.name)
     
     return npc
 
@@ -130,7 +136,7 @@ def move_sprite(direction):
     move_to_tile[map_index] -= map_movement
     y, x = current_tile
     j, i = move_to_tile
-    
+
     """
     print("\nCurrent tile: {}\nMove to: {}".format((x, y), (i, j)))   
     print("Current tile state:", res["tile states"][x][y])
@@ -138,7 +144,15 @@ def move_sprite(direction):
     """
 
     tile_state = res["tile states"][move_to_tile[1]][move_to_tile[0]]
+    # Check if any NPCs are at move_to_tile
+    for npc in res["NPCs"]:
+        if list(npc.at_tile) == move_to_tile:
+            tile_state = 2
+            res["Interacting with"] = npc
+            break
+    
     if tile_state == 0 and res["current button"] == "arrow":
+        res["Interacting with"] = None
         #print("Currently at tile {}".format(res["mc tile"]))
         res["mc tile"][map_index] -= map_movement
         res["mc frame"] = (res["mc frame"] + 1) % len(res["mc current"])
@@ -157,7 +171,9 @@ def move_sprite(direction):
         
         
         return "default"
-    elif tile_state == 1: return "collide"    
+    elif tile_state == 1:
+        res["Interacting with"] = None
+        return "collide"    
     elif tile_state == 2: return "interact"      
 
     #print(res["map pos"])
@@ -180,17 +196,20 @@ def smooth_map_movement(map_index, map_movement, smoothness = None):
 def update_screen():
     screen.fill(BLACK)
     screen.blit(res["map"], res["map pos"])
-    screen.blit(res["mc current"][res["mc frame"]], res["mc pos"])
     
     if res["current direction"] == res["last direction"] and res["show text"]:
-        screen.blit(res["text bar"], (0, 338))
+        #screen.blit(res["text bar"], (0, 338))
+        display_speech_text()
     else:
         res["show text"] = False
         
     ### TEMP ###
-    screen.blit(res["Oak"].sprites["R"][3], res["Oak pos"])
+    npc = res["Oak"]
+    screen.blit(npc.sprites[npc.dir][npc.frame_num], res["Oak pos"])
     ### END OF TEMP ###
 
+    # Always have the mc on top of all other objects on the map
+    screen.blit(res["mc current"][res["mc frame"]], res["mc pos"])
     
     if not res["animate"]:
         screen.fill(BLACK)
@@ -212,7 +231,7 @@ def reposition(movement_sequence):
             
     res["animate"] = True
 
-def interact(text):
+def interact():
     """
     Interact by facing an interact tile and pressing A,
     display text on valid interaction
@@ -220,9 +239,11 @@ def interact(text):
     tile_state = move_sprite(res["current direction"])
     res["last direction"] = res["current direction"]
     if tile_state == "interact":
-        display_speech_text(text)
+        obj = res["Interacting with"]
+        if obj: obj.turned_to_player = False
+        display_speech_text(obj)
 
-def display_speech_text(text):
+def display_speech_text(obj = None):
     """
     * Will display a pygame Surface containing the input text,
       allowing for scrolling/advancing through text with the A
@@ -230,8 +251,30 @@ def display_speech_text(text):
     * The speech_surfaces output is a list containing all the
       speech boxes required to show all the text
     """
+    if not obj:
+        obj = res["Interacting with"]
+    screen.blit(res["text bar"], (0, 338))
     speech_surfaces = []
-    #screen.blit(res["text bar"], (0, 0))
+    text_position = (25, 398)
+    # ONLY USING THE FIRST BASE TEXT (ELEMENT 0) FOR TESTING
+    if obj:
+        inverted_directions = {
+                            "U" : "D",
+                            "L" : "R",
+                            "D" : "U",
+                            "R" : "L"
+                            }
+        for message in obj.text[0]:
+            speech_surfaces.append(res["font"].render(message, True, BLACK))
+
+        screen.blit(speech_surfaces[0], text_position)
+        if not obj.turned_to_player:
+            obj.dir = inverted_directions[res["current direction"][0].upper()]
+            obj.turned_to_player = True
+    else:
+        text_surface = res["font"].render("Test text", True, BLACK)
+        screen.blit(text_surface, text_position)
+        
     res["show text"] = True
 
     return speech_surfaces
@@ -247,7 +290,6 @@ def play():
                 pygame.display.quit()
                 sys.exit()
 
-        button_press = (event.type == pygame.KEYDOWN)
         keys = pygame.key.get_pressed()
         #if button_press and event.key == pygame.K_DOWN:
         if keys[pygame.K_DOWN]:
@@ -257,31 +299,31 @@ def play():
             res["current direction"] = direction
             res["mc current"] = res["mc"][direction]
             move_sprite(direction)
-        elif button_press and event.key == pygame.K_LEFT:
+        elif keys[pygame.K_LEFT]:
             res["current button"] = "arrow"
             direction = "left"
             res["last direction"] = res["current direction"]
             res["current direction"] = direction
             res["mc current"] = res["mc"][direction]
             move_sprite(direction)
-        elif button_press and event.key == pygame.K_RIGHT:
+        elif keys[pygame.K_RIGHT]:
             res["current button"] = "arrow"
             direction = "right"
             res["last direction"] = res["current direction"]
             res["current direction"] = direction
             res["mc current"] = res["mc"][direction]
             move_sprite(direction)
-        elif button_press and event.key == pygame.K_UP:
+        elif keys[pygame.K_UP]:
             res["current button"] = "arrow"
             direction = "up"
             res["last direction"] = res["current direction"]
             res["current direction"] = direction
             res["mc current"] = res["mc"][direction]
             move_sprite(direction)
-        elif button_press and event.key == A_BUTTON:
+        elif keys[A_BUTTON]:
             res["current button"] = "A"
-            interact("This is an interactable object!")
-        elif button_press and event.key == B_BUTTON:
+            interact()
+        elif keys[B_BUTTON]:
             res["current button"] = "B"
             res["show text"] = False
 

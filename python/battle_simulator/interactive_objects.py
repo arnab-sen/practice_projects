@@ -15,9 +15,9 @@ SCALE = 3
 
 class Interactive:
 
-    def __init__(self, name, text):
+    def __init__(self, name):
         self.name = name
-        self.text = text
+        self.text = ""
         #self.sprite = self.load_sprite(name)
 
     def load_sprite(self, filename, folder = None):
@@ -32,14 +32,19 @@ class Interactive:
 
 class NPC(Interactive):
 
-    def __init__(self, name, text):
-        super().__init__(name, text)
+    def __init__(self, name):
+        super().__init__(name)
         self.sprites = self.load_sprites()
+        self.at_tile = None
+        self.dir = "D"
+        self.frame_num = 0
+        self.turned_to_player = False
 
     def load_sprites(self):
         loaded_sprites = {}
         frames = []
         folder = "Resources/Overworld/Interactive/NPCs/" + str(self.name) + "/"
+        self.path = folder
 
         directions = ["U", "D", "L", "R"]
         num_frames = 4
