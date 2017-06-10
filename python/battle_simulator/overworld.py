@@ -84,7 +84,7 @@ def get_NPC_list():
     #pass
 
     # Testing with Prof. Oak:
-    res["Oak"] = add_NPC("Oak", "Hello!", tile = (5, 5))
+    res["Oak"] = add_NPC("Oak", "Hello!", tile = (5, 8))
     
 
 def add_NPC(name, text, tile):
@@ -170,9 +170,11 @@ def smooth_map_movement(map_index, map_movement, smoothness = None):
     
     for i in range(1, smoothness + 1):
         res["map pos"][map_index] += map_movement * increment
+        res["Oak pos"][map_index] += map_movement * increment
         update_screen()
         advance_frame()
     res["map pos"][map_index] += map_movement * remainder
+    res["Oak pos"][map_index] += map_movement * remainder
    
     
 def update_screen():
@@ -181,14 +183,17 @@ def update_screen():
     screen.blit(res["mc current"][res["mc frame"]], res["mc pos"])
     
     if res["current direction"] == res["last direction"] and res["show text"]:
-        screen.blit(res["text bar"], (0, 337))
+        screen.blit(res["text bar"], (0, 338))
     else:
         res["show text"] = False
+        
+    ### TEMP ###
+    screen.blit(res["Oak"].sprites["R"][3], res["Oak pos"])
+    ### END OF TEMP ###
 
+    
     if not res["animate"]:
         screen.fill(BLACK)
-
-    screen.blit(res["Oak"].sprites["D"][0], res["Oak pos"])
 
 def advance_frame():
     #screen.blit(res["text bar"], (0, 0))
