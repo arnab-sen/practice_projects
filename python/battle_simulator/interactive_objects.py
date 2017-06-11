@@ -8,7 +8,7 @@ Defines the interactive objects in Pokemon World (e.g. NPCs, signs, doors)
 
 """
 
-import pygame, tile_viewer
+import pygame, tile_viewer, copy
 from PIL import Image
 
 SCALE = 3
@@ -35,9 +35,13 @@ class NPC(Interactive):
     def __init__(self, name):
         super().__init__(name)
         self.sprites = self.load_sprites()
+        self.text = None
         self.at_tile = None
         self.dir = "D"
         self.frame_num = 0
+        self.message_num = 0
+        self.line_num = -1
+        self.num_lines = 99999
         self.turned_to_player = False
 
     def load_sprites(self):
@@ -55,10 +59,20 @@ class NPC(Interactive):
                 sprite = super().load_sprite(filename, folder = folder)
                 frames.append(sprite)
             loaded_sprites[direction] = frames
-            frames = []
-            
+            frames = []      
 
         return loaded_sprites
+    def update_line(self):
+        if self.text:
+            self.num_lines = len(self.text[self.message_num])
+            #self.line_num = (self.line_num + 1) % num_lines
+            self.line_num += 1
+
+
+        return True
+    
+    def reset_dialogue(self):
+        self.line_num = 0 #len(self.text[self.message_num]) - 1
 
 if __name__ == "__main__":
     test = Interactive("test name", "test text")

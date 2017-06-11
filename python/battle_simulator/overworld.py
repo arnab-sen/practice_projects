@@ -76,6 +76,8 @@ def load_resources():
     res["show text"] = False
     res["current button"] = "arrow"
     res["font"] = pygame.font.Font("Resources/Pokemon Fonts/pkmnrs.ttf", 30)
+    res["current event"] = None
+    res["interacting with"] = None
     
     get_NPC_list()
 
@@ -87,7 +89,7 @@ def get_NPC_list():
     res["NPCs"] = []
 
     # Testing with Prof. Oak:
-    res["Oak"] = add_NPC("Oak", tile = (5, 8))
+    res["Oak"] = add_NPC("Oak", tile = (16, 14))
     res["NPCs"].append(res["Oak"])
 
 def add_NPC(name, tile):
@@ -116,6 +118,9 @@ def place_at(tile_row, tile_col, name = None):
         # add NPC to collection of NPCs on the current map
 
 def move_sprite(direction):
+    # Cannot move while reading text
+    if res["show text"]: return "interact"
+    
     if direction == "down":
         map_index = 1
         map_movement = -1
@@ -148,11 +153,11 @@ def move_sprite(direction):
     for npc in res["NPCs"]:
         if list(npc.at_tile) == move_to_tile:
             tile_state = 2
-            res["Interacting with"] = npc
+            res["interacting with"] = npc
             break
     
     if tile_state == 0 and res["current button"] == "arrow":
-        res["Interacting with"] = None
+        res["interacting with"] = None
         #print("Currently at tile {}".format(res["mc tile"]))
         res["mc tile"][map_index] -= map_movement
         res["mc frame"] = (res["mc frame"] + 1) % len(res["mc current"])
@@ -172,7 +177,7 @@ def move_sprite(direction):
         
         return "default"
     elif tile_state == 1:
-        res["Interacting with"] = None
+        res["interacting with"] = None
         return "collide"    
     elif tile_state == 2: return "interact"      
 
@@ -196,17 +201,16 @@ def smooth_map_movement(map_index, map_movement, smoothness = None):
 def update_screen():
     screen.fill(BLACK)
     screen.blit(res["map"], res["map pos"])
-    
-    if res["current direction"] == res["last direction"] and res["show text"]:
-        #screen.blit(res["text bar"], (0, 338))
-        display_speech_text()
-    else:
-        res["show text"] = False
-        
+            
     ### TEMP ###
     npc = res["Oak"]
     screen.blit(npc.sprites[npc.dir][npc.frame_num], res["Oak pos"])
     ### END OF TEMP ###
+    
+    if res["show text"]:
+        #screen.blit(res["text bar"], (0, 338))
+        display_speech_text()
+
 
     # Always have the mc on top of all other objects on the map
     screen.blit(res["mc current"][res["mc frame"]], res["mc pos"])
@@ -239,8 +243,9 @@ def interact():
     tile_state = move_sprite(res["current direction"])
     res["last direction"] = res["current direction"]
     if tile_state == "interact":
-        obj = res["Interacting with"]
-        if obj: obj.turned_to_player = False
+        obj = res["interacting with"]
+        if obj:
+            obj.turned_to_player = False
         display_speech_text(obj)
 
 def display_speech_text(obj = None):
@@ -252,11 +257,11 @@ def display_speech_text(obj = None):
       speech boxes required to show all the text
     """
     if not obj:
-        obj = res["Interacting with"]
+        obj = res["interacting with"]
     screen.blit(res["text bar"], (0, 338))
     speech_surfaces = []
     text_position = (25, 398)
-    # ONLY USING THE FIRST BASE TEXT (ELEMENT 0) FOR TESTING
+    
     if obj:
         inverted_directions = {
                             "U" : "D",
@@ -264,10 +269,10 @@ def display_speech_text(obj = None):
                             "D" : "U",
                             "R" : "L"
                             }
-        for message in obj.text[0]:
+        for message in obj.text[obj.message_num]:
             speech_surfaces.append(res["font"].render(message, True, BLACK))
 
-        screen.blit(speech_surfaces[0], text_position)
+        screen.blit(speech_surfaces[obj.line_num], text_position)        
         if not obj.turned_to_player:
             obj.dir = inverted_directions[res["current direction"][0].upper()]
             obj.turned_to_player = True
@@ -286,46 +291,58 @@ def play():
 
     while 1:
         for event in pygame.event.get():
+            res["current event"] = event
             if event.type == pygame.QUIT:
                 pygame.display.quit()
                 sys.exit()
 
         keys = pygame.key.get_pressed()
         #if button_press and event.key == pygame.K_DOWN:
-        if keys[pygame.K_DOWN]:
-            res["current button"] = "arrow"
-            direction = "down"
-            res["last direction"] = res["current direction"]
-            res["current direction"] = direction
-            res["mc current"] = res["mc"][direction]
-            move_sprite(direction)
-        elif keys[pygame.K_LEFT]:
-            res["current button"] = "arrow"
-            direction = "left"
-            res["last direction"] = res["current direction"]
-            res["current direction"] = direction
-            res["mc current"] = res["mc"][direction]
-            move_sprite(direction)
-        elif keys[pygame.K_RIGHT]:
-            res["current button"] = "arrow"
-            direction = "right"
-            res["last direction"] = res["current direction"]
-            res["current direction"] = direction
-            res["mc current"] = res["mc"][direction]
-            move_sprite(direction)
-        elif keys[pygame.K_UP]:
-            res["current button"] = "arrow"
-            direction = "up"
-            res["last direction"] = res["current direction"]
-            res["current direction"] = direction
-            res["mc current"] = res["mc"][direction]
-            move_sprite(direction)
-        elif keys[A_BUTTON]:
+        event = res["current event"]
+        if not res["show text"]:
+            if keys[pygame.K_DOWN]:
+                res["current button"] = "arrow"
+                direction = "down"
+                res["last direction"] = res["current direction"]
+                res["current direction"] = direction
+                res["mc current"] = res["mc"][direction]
+                move_sprite(direction)
+            elif keys[pygame.K_LEFT]:
+                res["current button"] = "arrow"
+                direction = "left"
+                res["last direction"] = res["current direction"]
+                res["current direction"] = direction
+                res["mc current"] = res["mc"][direction]
+                move_sprite(direction)
+            elif keys[pygame.K_RIGHT]:
+                res["current button"] = "arrow"
+                direction = "right"
+                res["last direction"] = res["current direction"]
+                res["current direction"] = direction
+                res["mc current"] = res["mc"][direction]
+                move_sprite(direction)
+            elif keys[pygame.K_UP]:
+                res["current button"] = "arrow"
+                direction = "up"
+                res["last direction"] = res["current direction"]
+                res["current direction"] = direction
+                res["mc current"] = res["mc"][direction]
+                move_sprite(direction)
+        if event and event.type == pygame.KEYUP and event.key == A_BUTTON:
             res["current button"] = "A"
             interact()
+            obj = res["interacting with"]
+            if obj:
+                obj.update_line()
+                if obj.line_num == obj.num_lines:
+                    obj.reset_dialogue()
+                    res["show text"] = False
+            event.key = None
         elif keys[B_BUTTON]:
             res["current button"] = "B"
             res["show text"] = False
+            obj = res["interacting with"]
+            if obj: obj.reset_dialogue()
 
         update_screen()
         advance_frame()
