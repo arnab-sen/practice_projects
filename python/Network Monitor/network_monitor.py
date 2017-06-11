@@ -3,7 +3,7 @@
 useful for monitoring the frequency of connection drops.
 * Connectivity based on try/except with urllib.request
 """
-import urllib.request, datetime
+import urllib.request, datetime, log_analysis
 import time as TIME
 
 def get_time(date_only = None):
@@ -31,7 +31,10 @@ def change_hour(hour, timezone_offset):
 def write_to_log(entry):
     date = get_time(date_only = True)
     with open("log.txt", "a") as log:
-        log.write(entry + "\n")   
+        log.write(entry + "\n")
+
+    # Complete a log analysis
+    log_analysis.get_disconnects()
 
 def run_monitor(wait_seconds):
     url = "https://google.com"
@@ -53,7 +56,7 @@ def run_monitor(wait_seconds):
         TIME.sleep(wait_seconds)
 
 def main():
-    run_monitor(5)
+    run_monitor(10)
 
 if __name__ == "__main__":
     main()
