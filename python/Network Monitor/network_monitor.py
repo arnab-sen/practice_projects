@@ -7,13 +7,11 @@ import urllib.request, datetime
 import time as TIME
 
 def get_time(date_only = None):
-    timezone_offset = 12
     date_and_time = str(datetime.datetime.now())
     date = date_and_time[:11]
     time = date_and_time[11:]
-    rest = time[time.find(":"):time.rfind(".")]
+    rest = time[time.find(":") : time.rfind(".")]
     hour = time[:time.find(":")]
-    #hour = change_hour(hour, timezone_offset)
 
     if date_only:
         return date
@@ -32,7 +30,7 @@ def change_hour(hour, timezone_offset):
 
 def write_to_log(entry):
     date = get_time(date_only = True)
-    with open(date + " Log.txt", "a") as log:
+    with open("log.txt", "a") as log:
         log.write(entry + "\n")   
 
 def run_monitor(wait_seconds):
@@ -55,7 +53,7 @@ def run_monitor(wait_seconds):
         TIME.sleep(wait_seconds)
 
 def main():
-    run_monitor(3)
+    run_monitor(5)
 
 if __name__ == "__main__":
     main()
