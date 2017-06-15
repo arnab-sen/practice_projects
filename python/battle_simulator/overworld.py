@@ -251,9 +251,9 @@ def interact():
         ### BATTLE TESTING ###
         if obj:
             if obj.can_battle and obj.final_line:
-                start_battle(my_pk = 1, opp_pk = obj.pokemon)
+                start_battle(my_pk = 158, opp_pk = obj.pokemon)
                 obj.can_battle = False
-                #obj.next_message()
+                obj.next_message()
 
 def display_speech_text(obj = None):
     """
@@ -276,10 +276,19 @@ def display_speech_text(obj = None):
                             "D" : "U",
                             "R" : "L"
                             }
-        for message in obj.text[obj.message_num]:
-            speech_surfaces.append(res["font"].render(message, True, BLACK))
+        for message in obj.messages:      
+            for line in message:
+                speech_surfaces.append(res["font"].render(line, True, BLACK))
+            obj.message_surfaces.append(speech_surfaces)
+            speech_surfaces = []
 
-        screen.blit(speech_surfaces[obj.line_num], text_position)        
+        try:
+            screen.blit(obj.message_surfaces[obj.message_num][obj.line_num], \
+                        text_position)
+        except IndexError:
+            print(obj.line_num, obj.message_num)
+            print(obj.messages[0][obj.line_num])
+        
         if not obj.turned_to_player:
             obj.dir = inverted_directions[res["current direction"][0].upper()]
             obj.turned_to_player = True

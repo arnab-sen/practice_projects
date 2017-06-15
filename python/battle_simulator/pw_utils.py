@@ -52,6 +52,18 @@ def get_NPC_dialogue(dialogue_type, NPC):
     with open(path, 'r') as file:
         all_dialogue = file.read()
 
+    messages = all_dialogue.split("{END}")
+    for i, message in enumerate(messages):
+        message = message.split("\n")
+        message.pop(-1)
+        messages[i] = message
+    NPC.messages = messages
+    NPC.text = messages[NPC.message_num]
+    NPC.line_num = 0
+
+    return messages
+        
+
 
     # SIMPLER: Just return each line of the txt file,
     # and leave the formatting up to the user
@@ -61,6 +73,8 @@ def get_NPC_dialogue(dialogue_type, NPC):
     dia_segments.pop(-1) # Remove closing brace (})
     NPC.text = [dia_segments]
     NPC.line_num = 0
+
+    print(dia_segments)
     
     return dia_segments
 

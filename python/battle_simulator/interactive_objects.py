@@ -35,18 +35,20 @@ class NPC(Interactive):
     def __init__(self, name, pokemon = None, can_battle = None):
         super().__init__(name)
         self.sprites = self.load_sprites()
+        self.messages = None
         self.text = None
         self.at_tile = None
         self.dir = "D"
         self.frame_num = 0
         self.message_num = 0
-        self.line_num = -1
+        self.line_num = 0
         self.num_lines = 99999
         self.turned_to_player = False
         if pokemon:
             self.pokemon = pokemon
         self.can_battle = True if can_battle else False
         self.final_line = False
+        self.message_surfaces = []
 
     def load_sprites(self):
         loaded_sprites = {}
@@ -68,9 +70,10 @@ class NPC(Interactive):
         return loaded_sprites
     def update_line(self):
         if self.text:
-            self.num_lines = len(self.text[self.message_num])
+            self.num_lines = len(self.messages[self.message_num])
             #self.line_num = (self.line_num + 1) % num_lines
-            self.line_num += 1
+            if self.line_num < self.num_lines:
+                self.line_num += 1
 
 
         return True
@@ -80,6 +83,7 @@ class NPC(Interactive):
 
     def next_message(self):
         self.message_num += 1
+        self.line_num = 0
 
 if __name__ == "__main__":
     test = Interactive("test name", "test text")
