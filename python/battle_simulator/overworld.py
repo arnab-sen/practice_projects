@@ -3,7 +3,7 @@
 
 import sys, pygame, time
 from PIL import Image
-import tile_viewer, interactive_objects, pw_utils
+import tile_viewer, interactive_objects, pw_utils, main_battle
 
 res = {}
 BLACK = 0, 0, 0
@@ -89,11 +89,11 @@ def get_NPC_list():
     res["NPCs"] = []
 
     # Testing with Prof. Oak:
-    res["Oak"] = add_NPC("Oak", tile = (16, 14))
+    res["Oak"] = add_NPC("Oak", tile = (7, 8), pokemon = 25, can_battle = True)
     res["NPCs"].append(res["Oak"])
 
-def add_NPC(name, tile):
-    npc = interactive_objects.NPC(name)
+def add_NPC(name, tile, pokemon = None, can_battle = None):
+    npc = interactive_objects.NPC(name, pokemon, can_battle)
     # Load NPC dialogue from txt file
     pw_utils.get_NPC_dialogue("base", npc)
     npc.at_tile = tile
@@ -248,6 +248,13 @@ def interact():
             obj.turned_to_player = False
         display_speech_text(obj)
 
+        ### BATTLE TESTING ###
+        if obj:
+            if obj.can_battle and obj.final_line:
+                start_battle(my_pk = 1, opp_pk = obj.pokemon)
+                obj.can_battle = False
+                #obj.next_message()
+
 def display_speech_text(obj = None):
     """
     * Will display a pygame Surface containing the input text,
@@ -283,6 +290,9 @@ def display_speech_text(obj = None):
     res["show text"] = True
 
     return speech_surfaces
+
+def start_battle(my_pk = None, opp_pk = None):
+    main_battle.play(screen, my_pk, opp_pk)
 
 def play():
     load_resources()
@@ -337,6 +347,8 @@ def play():
                 if obj.line_num == obj.num_lines:
                     obj.reset_dialogue()
                     res["show text"] = False
+                elif obj.line_num == obj.num_lines - 1:
+                    obj.final_line = True
             event.key = None
         elif keys[B_BUTTON]:
             res["current button"] = "B"

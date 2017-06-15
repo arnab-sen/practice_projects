@@ -32,7 +32,7 @@ class Interactive:
 
 class NPC(Interactive):
 
-    def __init__(self, name):
+    def __init__(self, name, pokemon = None, can_battle = None):
         super().__init__(name)
         self.sprites = self.load_sprites()
         self.text = None
@@ -43,6 +43,10 @@ class NPC(Interactive):
         self.line_num = -1
         self.num_lines = 99999
         self.turned_to_player = False
+        if pokemon:
+            self.pokemon = pokemon
+        self.can_battle = True if can_battle else False
+        self.final_line = False
 
     def load_sprites(self):
         loaded_sprites = {}
@@ -73,6 +77,9 @@ class NPC(Interactive):
     
     def reset_dialogue(self):
         self.line_num = 0 #len(self.text[self.message_num]) - 1
+
+    def next_message(self):
+        self.message_num += 1
 
 if __name__ == "__main__":
     test = Interactive("test name", "test text")

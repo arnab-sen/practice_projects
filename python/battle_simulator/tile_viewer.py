@@ -12,7 +12,6 @@ RED = 255, 0, 0
 GREEN = 0, 255, 0
 BLUE = 0, 0, 255
 SIZE = 1000, 840
-screen = pygame.display.set_mode(SIZE)
 TILE_DIM_ORIGINAL = 16
 SCALE = 2
 TILE_DIM = TILE_DIM_ORIGINAL * SCALE
@@ -181,7 +180,7 @@ def play():
                 mouse_position = pygame.mouse.get_pos()
                 clicked_tile = mouse_in_tile(mouse_position, tiles)
                 if clicked_tile[0] != -1:
-                    #print("Tile [{}, {}] selected!".format(*clicked_tile))
+                    print("Tile [{}, {}] selected!".format(*clicked_tile))
                     show_tile_border(tiles, *clicked_tile, click = True)
 
         save_tile_states()
@@ -190,4 +189,5 @@ def play():
         advance_frame()
 
 if __name__ == "__main__":
+    screen = pygame.display.set_mode(SIZE)
     play()

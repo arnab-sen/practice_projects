@@ -497,6 +497,6 @@ if __name__ == "__main__":
     #    if numbered_pokemon[num] not in pokemon_stats:
     #        #print(numbered_pokemon[num])
     #        pass
-    get_stat_moves()
+    #get_stat_moves()
     pass
 

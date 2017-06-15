@@ -6,7 +6,10 @@ import sys, pygame, time, random
 import battle, get_pokemon_info
 from PIL import Image
 
-def load_resources():
+def load_resources(screen = None, my_pk = None, opp_pk = None):
+    """my_pk and opp_pk must be the national dex numbers
+    of the pokemon"""
+    
     # State machine functions
     res["show moves logic"] = show_moves_logic
     res["show moves display"] = show_moves_display
@@ -26,9 +29,23 @@ def load_resources():
     res["text colour"] = res["black"]
     res["anti alias"] = True
     res["size"] = 720, 480
-    res["screen"] = pygame.display.set_mode(res["size"])
+
+    # Don't think the following if/else are necessary, may remove later
+    if screen:
+        res["screen"] = screen
+    else:
+        res["screen"] = pygame.display.set_mode(res["size"])
+        
     number_of_pokemon = 2
     pokemon_numbers = get_random_pokemon(number_of_pokemon)
+    
+    if my_pk:
+        my_pk = get_pokemon_info.pokemon_number(my_pk)
+        pokemon_numbers[0] = my_pk
+    if opp_pk:
+        opp_pk = get_pokemon_info.pokemon_number(opp_pk)
+        pokemon_numbers[1] = opp_pk
+    
     pokemon_names = get_pokemon_names(pokemon_numbers)
     pokemon_1 = pokemon_numbers[0]
     pokemon_2 = pokemon_numbers[1]
@@ -122,8 +139,6 @@ def get_moves(pokemon_name):
 def create_pokemon(pokemon_numbers, moves):
     pokemon = []
     numbered_pokemon = get_pokemon_info.get_dict("numbered_pokemon.txt")
-    # TODO:
-    # - Get the following placeholder stats from a dict instead
     i = 0
     all_stats = get_pokemon_info.get_dict("pokemon_stats.txt")
     
@@ -336,12 +351,12 @@ def attack_display():
     battle_text = res["battle text"]
     
     screen.blit(text_bar, (0, 337))
-    screen.blit(battle_text[0], (25, 360))
+    #screen.blit(battle_text[0], (25, 360))
     screen.blit(battle_text[1], (25, 398))
-    screen.blit(battle_text[2], (25, 435))
+    #screen.blit(battle_text[2], (25, 435))
 
 def game_over_logic():
-    pass
+    res["game over"] = True
 
 def game_over_display():
     screen = res["screen"]
@@ -439,38 +454,61 @@ def advance_frame():
     # chosen rectangle portions of the screen to update
     pygame.display.flip()
 
-def main(resources):
-    # Initialise
-    res = resources # Dict of all resource variables
-    pygame.init()
-    pygame.font.init()
-    load_resources()
-    p0 = res["pokemon"][0]
-    p1 = res["pokemon"][1]
-    #res["game state"] = "start"
-    res["game state"] = "show moves"
-    res["game over"] = False
-    res["my turn"] = True
-    res["exit game"] = False
-    res["move selected"] = -1 # [-1, 0, 1] = [not selected, selected, confirmed]
-    res["selected index"] = -2 # random value that isn't a possible index and not -1
+def main(screen = None, my_pk = None, opp_pk = None):
+    # res is a dict of all resource variables
+    res["keep playing"] = True
+    while res["keep playing"]:
+        res["keep playing"] = False
+        # Initialise
+        pygame.init()
+        pygame.font.init()
+        load_resources(screen, my_pk, opp_pk)
+        p0 = res["pokemon"][0]
+        p1 = res["pokemon"][1]
+        #res["game state"] = "start"
+        res["game state"] = "show moves"
+        res["game over"] = False
+        res["my turn"] = True
+        res["exit game"] = False
+        res["move selected"] = -1 # [-1, 0, 1] = [not selected, selected, confirmed]
+        res["selected index"] = -2 # random value that isn't a possible index and not -1
 
-    while 1:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.display.quit()
-                sys.exit()
-            elif event.type == pygame.MOUSEBUTTONUP:
-                mouse_position = pygame.mouse.get_pos()
-                res["current quadrant"] = mouse_in_quadrant(mouse_position, res["quadrants"])
-                res["game state"] = update_state_machine()
-                res[res["game state"] + " logic"]()
+        while 1:
+            if res["game over"]:
+                for event in pygame.event.get():
+                    keys = pygame.key.get_pressed()
+                    if keys[pygame.K_r]:
+                        res["keep playing"] = True
+                    elif keys[pygame.K_ESCAPE]:
+                        #pygame.display.quit()
+                        #sys.exit()
+                        return
+                if res["keep playing"]:
+                    break
+            for event in pygame.event.get():
+                keys = pygame.key.get_pressed()
+                if event.type == pygame.QUIT or keys[pygame.K_ESCAPE]:
+                    pygame.display.quit()
+                    sys.exit()
+                elif event.type == pygame.MOUSEBUTTONUP:
+                    mouse_position = pygame.mouse.get_pos()
+                    res["current quadrant"] = mouse_in_quadrant(mouse_position,
+                                                                res["quadrants"])
+                    res["game state"] = update_state_machine()
+                    res[res["game state"] + " logic"]()
+                elif keys[pygame.K_r]:
+                    res["keep playing"] = True
+            if res["keep playing"]:
+                    break
 
-        update_screen()
-        res[res["game state"] + " display"]()
+            update_screen()
+            res[res["game state"] + " display"]()
 
-        advance_frame()
-  
-#if __name__ == "__main__":
+            advance_frame()
+
+def play(screen = None, my_pk = None, opp_pk = None):
+    main(screen, my_pk, opp_pk)
+
 res = {} # Resources dict kept as a global variable for easy access
-main(res)
+if __name__ == "__main__":
+    main()
