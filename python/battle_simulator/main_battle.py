@@ -113,6 +113,9 @@ def load_resources(screen = None, my_pk = None, opp_pk = None):
     for quadrant in res["quadrants"]:
         res["move selection pos"] += [(quadrant[0] + 3, quadrant[1] + 3)]
 
+    #res["battle music"] =
+    load_sound("FRLG_Battle_01.mp3")
+
 def get_random_pokemon(number_of_pokemon):
     # Returns a list of n random pokemon from
     # 001 - 649 (Bulbasaur to Genesect)    
@@ -425,6 +428,13 @@ def update_hp_bars():
     screen.blit(hp_text[1], (hp_colour_pos[0][0] + 80, hp_colour_pos[0][1] + 15))
     screen.blit(hp_text[0], (hp_colour_pos[1][0] + 80, hp_colour_pos[1][1] + 15))
 
+def load_sound(filename):
+    path = "Resources/Sounds/"
+    if not pygame.mixer:
+        return None
+    else:
+        return pygame.mixer.music.load(path + filename)
+
 def update_screen():
     screen = res["screen"]
     f2 = res["opp pokemon sprite"]
@@ -462,7 +472,9 @@ def main(screen = None, my_pk = None, opp_pk = None):
         # Initialise
         pygame.init()
         pygame.font.init()
+        pygame.mixer.init()
         load_resources(screen, my_pk, opp_pk)
+        
         p0 = res["pokemon"][0]
         p1 = res["pokemon"][1]
         #res["game state"] = "start"
@@ -472,6 +484,9 @@ def main(screen = None, my_pk = None, opp_pk = None):
         res["exit game"] = False
         res["move selected"] = -1 # [-1, 0, 1] = [not selected, selected, confirmed]
         res["selected index"] = -2 # random value that isn't a possible index and not -1
+        #res["battle music"].play()
+        pygame.mixer.music.set_volume(0.1)
+        pygame.mixer.music.play()
 
         while 1:
             if res["game over"]:
@@ -482,12 +497,14 @@ def main(screen = None, my_pk = None, opp_pk = None):
                     elif keys[pygame.K_ESCAPE]:
                         #pygame.display.quit()
                         #sys.exit()
+                        pygame.mixer.music.stop()
                         return
                 if res["keep playing"]:
                     break
             for event in pygame.event.get():
                 keys = pygame.key.get_pressed()
                 if event.type == pygame.QUIT or keys[pygame.K_ESCAPE]:
+                    pygame.mixer.music.stop()
                     pygame.display.quit()
                     sys.exit()
                 elif event.type == pygame.MOUSEBUTTONUP:
@@ -505,6 +522,9 @@ def main(screen = None, my_pk = None, opp_pk = None):
             res[res["game state"] + " display"]()
 
             advance_frame()
+
+        #res["battle music"].stop()
+        pygame.mixer.music.stop()
 
 def play(screen = None, my_pk = None, opp_pk = None):
     main(screen, my_pk, opp_pk)
