@@ -14,3 +14,4 @@ python/Lib/
 python/Scripts/nuitka
 python/Scripts/nuitka*
 *.pyc
+*.mp3
