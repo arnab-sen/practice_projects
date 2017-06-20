@@ -29,7 +29,7 @@ def test_main():
     pygame.display.set_caption("pyMario")
     window_icon = pygame.image.load("Resources/Images/Other/pyMario_icon.png")
     pygame.display.set_icon(window_icon)
-    map_position = [0, 0]
+    map_position = [-5000, 0]
     move_pixels = round(2.5 * image_scale)
     while 1:
         keys = pygame.key.get_pressed()
@@ -38,13 +38,24 @@ def test_main():
                 pygame.display.quit()
                 return
         if keys[pygame.K_RIGHT]:
-            map_position[0] -= move_pixels
+            at_right_border = map_position[0] <= -5750
+            if not at_right_border:
+                map_position[0] -= move_pixels
         elif keys[pygame.K_LEFT]:
-            map_position[0] += move_pixels
+            at_left_border = -1 * map_position[0] < 0
+            if not at_left_border:
+                map_position[0] += move_pixels
             
         
         screen.blit(test_map.image_pygame, map_position)
         pygame.display.flip()
+
+def TODO():
+    """
+    * Stop map movement at the left and right edges of the map
+    * 
+    """
+    pass
 
 if __name__ == "__main__":
     main()
