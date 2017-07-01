@@ -38,7 +38,7 @@ def sort_by_date(keys):
               "September", "October", "November", "December"]
     days = ["Monday", "Tuesday", "Wednesday",
             "Thursday", "Friday", "Saturday", "Sunday"]
-    sorted_keys = date_to_tuples(keys, months, days)
+    sorted_keys = dates_to_tuples(keys, months, days)
     sorted_dates = tuples_to_dates(sorted_keys, months, days)
 
     return sorted_dates
@@ -46,7 +46,7 @@ def sort_by_date(keys):
 ### ---------------- ###
 ### Helper Functions ###
 
-def date_to_tuples(dates, months, days):
+def dates_to_tuples(dates, months, days):
     """Converts a list of dates (form "DAY DATE MONTH") into
     a list of tuples, and sorts it, e.g.:
     "Monday 10 December" -> (12, 10, 1)
@@ -80,8 +80,7 @@ def tuples_to_dates(tuple_list, months, days):
         string_date = day + " " + str(date) + " " + month
         dates.append(string_date)
 
-    return dates
-    
+    return dates   
 
 def get_days_per_month(year = 2017):
     """Returns a dict of key : val = month_n : days in month_n
@@ -135,8 +134,7 @@ def test_main():
     test_dates = generate_test_data(num_dates = 5)
     print(test_dates)
     sorted_dates = sort_by_date(test_dates)
-    print(sorted_dates)
-                  
+    print(sorted_dates)                 
 
 if __name__ == "__main__":
     test_main()
