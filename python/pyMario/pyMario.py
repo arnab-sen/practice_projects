@@ -1,4 +1,5 @@
-"""This is recreation of Super Mario Bros. for the NES
+"""
+This is recreation of Super Mario Bros. for the NES
 
 """
 import pygame
@@ -23,11 +24,29 @@ class Entity:
 class Mario(Entity):
     def __init__(self, name, path):
         super().__init__(name, path)
+        self.status = "idle"
+        self.jump_state = 0
 
     def jump(self):
-        self.position[1] -= 1
-    
+##        print(self.jump_state)
+        final_jump_state = 18
+        jump_apex = final_jump_state // 2
+        if self.jump_state == 0:          
+            self.status = "jumping"
 
+        if self.jump_state == final_jump_state:
+            self.jump_state = 0
+            self.status = "idle"
+
+            return
+        else:
+            if self.jump_state < jump_apex:
+                self.position[1] -= 7
+            else:
+                self.position[1] += 7
+
+            self.jump_state += 1
+    
 def set_current_map():
     map_name = "1_1"
 
@@ -42,6 +61,14 @@ def load_character():
     res["mario"] = Mario(name, path)
 
     return res["mario"]
+
+def update_map_objects():
+    mario = res["mario"]
+    if mario.status == "jumping":
+        mario.jump()
+
+    # Limit framerate
+    pygame.time.Clock().tick(60)
 
 def main():
     pass
@@ -79,7 +106,7 @@ def test_main():
         elif keys[pygame.K_UP]:
             mario.jump()
             
-        
+        update_map_objects()
         screen.blit(test_map.image_pygame, map_position)
         screen.blit(mario.sprite_pygame, mario.position)
         pygame.display.flip()
