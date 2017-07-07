@@ -494,7 +494,7 @@ def main(screen = None, my_pk = None, opp_pk = None):
                     keys = pygame.key.get_pressed()
                     if keys[pygame.K_r]:
                         res["keep playing"] = True
-                    elif keys[pygame.K_ESCAPE]:
+                    elif keys[pygame.K_ESCAPE] or keys[pygame.K_a]:
                         #pygame.display.quit()
                         #sys.exit()
                         pygame.mixer.music.stop()

@@ -180,7 +180,8 @@ def play():
                 mouse_position = pygame.mouse.get_pos()
                 clicked_tile = mouse_in_tile(mouse_position, tiles)
                 if clicked_tile[0] != -1:
-                    print("Tile [{}, {}] selected!".format(*clicked_tile))
+                    print("Tile [{}, {}] selected!".format(clicked_tile[1],\
+                                                           clicked_tile[0]))
                     show_tile_border(tiles, *clicked_tile, click = True)
 
         save_tile_states()

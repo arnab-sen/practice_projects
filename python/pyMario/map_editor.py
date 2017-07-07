@@ -47,12 +47,7 @@ def test_main():
         pygame.display.flip()
     
 
-def TODO():
-    """
-    * Stop map movement at the left and right edges of the map
-    * 
-    """
-    pass
+
 
 if __name__ == "__main__":
     test_main()

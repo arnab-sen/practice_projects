@@ -89,7 +89,7 @@ def get_NPC_list():
     res["NPCs"] = []
 
     # Testing with Prof. Oak:
-    res["Oak"] = add_NPC("Oak", tile = (7, 8), pokemon = 25, can_battle = True)
+    res["Oak"] = add_NPC("Oak", tile = (16, 14), pokemon = 25, can_battle = True)
     res["NPCs"].append(res["Oak"])
 
 def add_NPC(name, tile, pokemon = None, can_battle = None):
