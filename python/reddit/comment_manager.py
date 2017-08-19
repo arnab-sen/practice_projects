@@ -30,8 +30,12 @@ class User():
 	def get_comments(self):
 		return list(self.__user.comments.new())
 
+	def __repr__(self):
+		return "Username: " + self.__username
+
 def main():
 	user = User()
+	print(user)
 	comments = user.get_comments()
 	for comment in comments:
 		comment.edit("[deleted]")
