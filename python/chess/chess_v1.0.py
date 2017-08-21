@@ -1,3 +1,7 @@
+"""
+A text-based chess game
+"""
+
 import copy
 import random
 import time
