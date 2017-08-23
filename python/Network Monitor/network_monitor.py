@@ -46,7 +46,10 @@ def alert():
     """
     if not CONNECTED[0] and CONNECTED[1]:
         winsound.Beep(1000, 850)
-        win32api.MessageBox(0, "Reconnected!", "")  
+        win32api.MessageBox(0, "Reconnected!", "")
+    elif CONNECTED[0] and not CONNECTED[1]:
+        winsound.Beep(1000, 850)
+        win32api.MessageBox(0, "Disconnected!", "")
 
     CONNECTED[0] = CONNECTED[1]
     
@@ -69,8 +72,7 @@ def run_monitor(wait_seconds):
             write_to_log(entry)
         finally:
             alert()
-
-        TIME.sleep(wait_seconds)
+            TIME.sleep(wait_seconds)
 
 def main():
     run_monitor(3)
