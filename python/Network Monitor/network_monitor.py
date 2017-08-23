@@ -3,7 +3,7 @@
 useful for monitoring the frequency of connection drops.
 * Connectivity based on try/except with urllib.request
 """
-import urllib.request, datetime, log_analysis
+import urllib.request, urllib.error, datetime, log_analysis
 import time as TIME
 import win32api, winsound
 
@@ -32,6 +32,7 @@ def change_hour(hour, timezone_offset):
     return hour
 
 def write_to_log(entry):
+    return
     date = get_time(date_only = True)
     with open("log.txt", "a") as log:
         log.write(entry + "\n")
@@ -39,16 +40,23 @@ def write_to_log(entry):
     # Complete a log analysis
     log_analysis.get_disconnects()
 
+def beep(short = True):
+    if short:
+        for i in range(3):
+            winsound.Beep(1000, 300)
+    else:
+        winsound.Beep(1000, 850)    
+
 def alert():
     """
     Sounds a beep and creates an alert messagebox if the
     connection is now active after being disconnected
     """
     if not CONNECTED[0] and CONNECTED[1]:
-        winsound.Beep(1000, 850)
+        beep()
         win32api.MessageBox(0, "Reconnected!", "")
     elif CONNECTED[0] and not CONNECTED[1]:
-        winsound.Beep(1000, 850)
+        beep()
         win32api.MessageBox(0, "Disconnected!", "")
 
     CONNECTED[0] = CONNECTED[1]
@@ -57,14 +65,14 @@ def run_monitor(wait_seconds):
     url = "https://google.com"
     while 1:
         try:
-            with urllib.request.urlopen(url) as response:
+            with urllib.request.urlopen(url, timeout = 1) as response:
                 packet = response.read(1)
             CONNECTED[1] = True
             time = get_time()
             entry = time + "\t" + "OK"
             print(entry)
             write_to_log(entry)
-        except:
+        except urllib.error.URLError:
             CONNECTED[1] = False
             time = get_time()
             entry = time + "\t" + "DISCONNECTED"
