@@ -52,38 +52,53 @@ def alert():
     Sounds a beep and creates an alert messagebox if the
     connection is now active after being disconnected
     """
-    if not CONNECTED[0] and CONNECTED[1]:
-        beep()
-        win32api.MessageBox(0, "Reconnected!", "")
-    elif CONNECTED[0] and not CONNECTED[1]:
-        beep()
-        win32api.MessageBox(0, "Disconnected!", "")
+    messages = {
+                (False, True) : "Reconnected!",
+                (True, False) : "Disconnected!"
+                }
+    
+    if ALERTS:
+        if CONNECTED in ([False, True], [True, False]):
+            beep()
+            win32api.MessageBox(0, messages[tuple(CONNECTED)], "")
 
     CONNECTED[0] = CONNECTED[1]
     
-def run_monitor(wait_seconds):
+def run_monitor(wait_seconds, alerts):
     url = "https://google.com"
-    while 1:
-        try:
-            with urllib.request.urlopen(url, timeout = 1) as response:
-                packet = response.read(1)
-            CONNECTED[1] = True
-            time = get_time()
-            entry = time + "\t" + "OK"
-            print(entry)
-            write_to_log(entry)
-        except urllib.error.URLError:
-            CONNECTED[1] = False
-            time = get_time()
-            entry = time + "\t" + "DISCONNECTED"
-            print(entry)
-            write_to_log(entry)
-        finally:
-            alert()
-            TIME.sleep(wait_seconds)
+    
+    try:
+        with urllib.request.urlopen(url, timeout = 10) as response:
+            packet = response.read(1)
+        CONNECTED[1] = True
+        time = get_time()
+        entry = time + "\t" + "OK"
+        print(entry)
+        write_to_log(entry)
+    except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError):
+        CONNECTED[1] = False
+        time = get_time()
+        entry = time + "\t" + "DISCONNECTED"
+        print(entry)
+        write_to_log(entry)
+    
+    except Exception as e:
+        print("Error:", e)        
+    finally:
+        alert()
+        TIME.sleep(wait_seconds)
 
 def main():
-    run_monitor(3)
+    alerts = {True : "Alerts are ON", False : "Alerts are OFF"}
+    global ALERTS
+    ALERTS = True
+    while 1:
+        try:
+            run_monitor(3, alerts)
+        except KeyboardInterrupt:
+            ALERTS = not ALERTS
+            print(alerts[ALERTS])
+        
 
 if __name__ == "__main__":
     main()
