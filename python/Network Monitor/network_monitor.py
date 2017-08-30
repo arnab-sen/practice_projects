@@ -95,8 +95,7 @@ def main():
             run_monitor(3)
         except KeyboardInterrupt:
             ALERTS = not ALERTS
-            print("Alerts are " + "ON" * ALERTS + "OFF" * (not ALERTS))
-        
+            print("Alerts are", "ON" if ALERTS else "OFF")        
 
 if __name__ == "__main__":
     main()
