@@ -13,12 +13,16 @@ class YT(pytube.YouTube):
 		if download_progress == 100.0:
 			print("Download complete!")
 
-#url = input("Enter video url: ")
-url = ""
-yt = YT(url)
-videos = yt.get_videos()
+def download(url):
+        yt = YT(url)
+        video = yt.get_videos()[3]
+        video.download("Downloads", on_progress = yt.on_progress)
 
-for i, video in enumerate(videos):
-	print(i, video)
+def main():
+        urls = input("Enter video urls separated by a space: ").split()
+        for i, url in enumerate(urls):
+                print("Downloading video {}/{}".format(i + 1, len(urls)))
+                download(url)
 
-videos[0].download("Downloads", on_progress = yt.on_progress)
+if __name__ == "__main__":
+        main()
