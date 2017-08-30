@@ -64,7 +64,7 @@ def alert():
 
     CONNECTED[0] = CONNECTED[1]
     
-def run_monitor(wait_seconds, alerts):
+def run_monitor(wait_seconds):
     url = "https://google.com"
     
     try:
@@ -81,7 +81,6 @@ def run_monitor(wait_seconds, alerts):
         entry = time + "\t" + "DISCONNECTED"
         print(entry)
         write_to_log(entry)
-    
     except Exception as e:
         print("Error:", e)        
     finally:
@@ -89,15 +88,14 @@ def run_monitor(wait_seconds, alerts):
         TIME.sleep(wait_seconds)
 
 def main():
-    alerts = {True : "Alerts are ON", False : "Alerts are OFF"}
     global ALERTS
     ALERTS = True
     while 1:
         try:
-            run_monitor(3, alerts)
+            run_monitor(3)
         except KeyboardInterrupt:
             ALERTS = not ALERTS
-            print(alerts[ALERTS])
+            print("Alerts are " + "ON" * ALERTS + "OFF" * (not ALERTS))
         
 
 if __name__ == "__main__":
