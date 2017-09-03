@@ -8,6 +8,8 @@ import time as TIME
 import win32api, winsound
 
 CONNECTED = [True, True]
+CURRENT_TIME = None
+LAST_DISCONNECT_TIME = None
 
 def get_time(date_only = None):
     date_and_time = str(datetime.datetime.now())
@@ -63,22 +65,48 @@ def alert():
             win32api.MessageBox(0, messages[tuple(CONNECTED)], "")
 
     CONNECTED[0] = CONNECTED[1]
+
+def time_to_seconds(time):
+    """ Converts a string time of form HH:MM:SS into int seconds
+    """
+    time = time.split(" -- ")
+    time = time[-1]
+    time = time.split(":")
+    time = [int(i) for i in time]
+
+    return time[0] * 3600 + time[1] * 60 + time[2]
+
+def segment_num(val, sep):
+    return val // sep, val % sep
+
+def get_uptime(start, stop):
+    uptime = time_to_seconds(stop) - time_to_seconds(start)
+    time = uptime
+    hours, time = segment_num(time, 3600)
+    minutes, time = segment_num(time, 60)
+    seconds, time = segment_num(time, 1)
+
+    return " -- Uptime: {}h {}m {}s".format(hours, minutes, seconds)
     
 def run_monitor(wait_seconds):
     url = "https://google.com"
+    global CURRENT_TIME, LAST_DISCONNECT_TIME
     
     try:
         with urllib.request.urlopen(url, timeout = 10) as response:
             packet = response.read(1)
         CONNECTED[1] = True
-        time = get_time()
-        entry = time + "\t" + "OK"
+        CURRENT_TIME = get_time()
+        if not LAST_DISCONNECT_TIME:
+            LAST_DISCONNECT_TIME = CURRENT_TIME
+        entry = CURRENT_TIME + "\t" + "OK" + get_uptime(LAST_DISCONNECT_TIME, CURRENT_TIME)
         print(entry)
         write_to_log(entry)
     except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError):
         CONNECTED[1] = False
-        time = get_time()
-        entry = time + "\t" + "DISCONNECTED"
+        CURRENT_TIME = get_time()
+        LAST_DISCONNECT_TIME = CURRENT_TIME
+        entry = CURRENT_TIME + "\t" + "DISCONNECTED" + get_uptime("00:00:00", "00:00:00")
         print(entry)
         write_to_log(entry)
     except Exception as e:
@@ -95,7 +123,7 @@ def main():
             run_monitor(3)
         except KeyboardInterrupt:
             ALERTS = not ALERTS
-            print("Alerts are", "ON" if ALERTS else "OFF")        
+            print("Alerts are " + ("ON" if ALERTS else "OFF"))        
 
 if __name__ == "__main__":
     main()
