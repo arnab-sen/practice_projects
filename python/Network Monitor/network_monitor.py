@@ -42,12 +42,15 @@ def write_to_log(entry):
     # Complete a log analysis
     log_analysis.get_disconnects()
 
-def beep(short = True):
-    if short:
-        for i in range(3):
-            winsound.Beep(1000, 300)
+def beep(mode):
+    if mode == "Disconnected!":
+        winsound.Beep(1000, 300)
+        winsound.Beep(750, 400)
+    elif mode == "Reconnected!":
+        winsound.Beep(750, 300)
+        winsound.Beep(1000, 400)
     else:
-        winsound.Beep(1000, 850)    
+        winsound.Beep(1000, 300)
 
 def alert():
     """
@@ -59,10 +62,11 @@ def alert():
                 (True, False) : "Disconnected!"
                 }
     
-    if ALERTS:
-        if CONNECTED in ([False, True], [True, False]):
-            beep()
-            win32api.MessageBox(0, messages[tuple(CONNECTED)], "")
+    if CONNECTED in ([False, True], [True, False]):
+        message = messages[tuple(CONNECTED)]
+        beep(message)
+        if ALERTS:
+            win32api.MessageBox(0, message, "")
 
     CONNECTED[0] = CONNECTED[1]
 
@@ -123,7 +127,7 @@ def main():
             run_monitor(3)
         except KeyboardInterrupt:
             ALERTS = not ALERTS
-            print("Alerts are " + ("ON" if ALERTS else "OFF"))        
+            print("Message alerts are " + ("ON" if ALERTS else "OFF"))        
 
 if __name__ == "__main__":
     main()
