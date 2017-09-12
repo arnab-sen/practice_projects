@@ -54,19 +54,20 @@ def beep(mode):
 
 def alert():
     """
-    Sounds a beep and creates an alert messagebox if the
-    connection is now active after being disconnected
+    Sounds a beep and creates an alert messagebox if the current
+    connection state is different from the previous one
     """
     messages = {
                 (False, True) : "Reconnected!",
                 (True, False) : "Disconnected!"
                 }
     
-    if CONNECTED in ([False, True], [True, False]):
-        message = messages[tuple(CONNECTED)]
-        beep(message)
-        if ALERTS:
-            win32api.MessageBox(0, message, "")
+    if ALERT_MODE in (0, 1):
+        if CONNECTED in ([False, True], [True, False]):
+            message = messages[tuple(CONNECTED)]
+            beep(message)
+            if ALERT_MODE == 0:
+                win32api.MessageBox(0, message, "")
 
     CONNECTED[0] = CONNECTED[1]
 
@@ -83,14 +84,14 @@ def time_to_seconds(time):
 def segment_num(val, sep):
     return val // sep, val % sep
 
-def get_uptime(start, stop):
+def get_uptime(start, stop, pref = " -- Uptime: "):
     uptime = time_to_seconds(stop) - time_to_seconds(start)
     time = uptime
     hours, time = segment_num(time, 3600)
     minutes, time = segment_num(time, 60)
     seconds, time = segment_num(time, 1)
 
-    return " -- Uptime: {}h {}m {}s".format(hours, minutes, seconds)
+    return pref + "{}h {}m {}s".format(hours, minutes, seconds)
     
 def run_monitor(wait_seconds):
     url = "https://google.com"
@@ -101,16 +102,19 @@ def run_monitor(wait_seconds):
             packet = response.read(1)
         CONNECTED[1] = True
         CURRENT_TIME = get_time()
-        if not LAST_DISCONNECT_TIME:
+        if not LAST_DISCONNECT_TIME or CONNECTED == [False, True]:
             LAST_DISCONNECT_TIME = CURRENT_TIME
-        entry = CURRENT_TIME + "\t" + "OK" + get_uptime(LAST_DISCONNECT_TIME, CURRENT_TIME)
+        entry = CURRENT_TIME + "\t" + "OK" + \
+                get_uptime(LAST_DISCONNECT_TIME, CURRENT_TIME)
         print(entry)
         write_to_log(entry)
     except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError):
         CONNECTED[1] = False
         CURRENT_TIME = get_time()
-        LAST_DISCONNECT_TIME = CURRENT_TIME
-        entry = CURRENT_TIME + "\t" + "DISCONNECTED" + get_uptime("00:00:00", "00:00:00")
+        if CONNECTED == [True, False]:
+            LAST_DISCONNECT_TIME = CURRENT_TIME
+        entry = CURRENT_TIME + "\t" + "DISCONNECTED" + \
+                get_uptime(LAST_DISCONNECT_TIME, CURRENT_TIME, pref = " -- Downtime: ")
         print(entry)
         write_to_log(entry)
     except Exception as e:
@@ -120,14 +124,22 @@ def run_monitor(wait_seconds):
         TIME.sleep(wait_seconds)
 
 def main():
-    global ALERTS
-    ALERTS = True
+    global ALERT_MODE
+    ALERT_MODE = 1
+    alert_message = "\nMode {}/3 - Alert Messages {}, Sound {}"
+    alert_params = {
+                        0 : (1, "ON", "ON"),
+                        1 : (2, "OFF", "ON"),
+                        2 : (3, "OFF", "OFF")
+                        }
+    print("Current mode:" + alert_message.format(*alert_params[ALERT_MODE]))
+    
     while 1:
         try:
             run_monitor(3)
         except KeyboardInterrupt:
-            ALERTS = not ALERTS
-            print("Message alerts are " + ("ON" if ALERTS else "OFF"))        
+            ALERT_MODE = (ALERT_MODE + 1) % 3
+            print(alert_message.format(*alert_params[ALERT_MODE]))        
 
 if __name__ == "__main__":
     main()
