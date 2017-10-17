@@ -1,3 +1,4 @@
+#! /usr/bin/python3.5
 """
 * Initial version: a simple tool to check and log internet connectivity,
 useful for monitoring the frequency of connection drops.
@@ -125,7 +126,7 @@ def run_monitor(wait_seconds):
 
 def main():
     global ALERT_MODE
-    ALERT_MODE = 1
+    ALERT_MODE = 2
     alert_message = "\nMode {}/3 - Alert Messages {}, Sound {}"
     alert_params = {
                         0 : (1, "ON", "ON"),
