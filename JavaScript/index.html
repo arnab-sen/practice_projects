@@ -1,0 +1,74 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+	<style>
+	/*bg black, text silver*/
+		body {
+				background-color: black;
+				color: silver;
+				}
+	</style>
+		<title>
+		Hangman
+		</title>
+	</head>
+<body>
+<div id = "baseFrame">
+---------<br>|<br>|<br>|<br>|<br>|<br>TTTTTTTTTT
+</div>
+<div id = "frame0" style = "display: none">
+---------<br>|<br>|<br>|<br>|<br>|<br>TTTTTTTTTT
+</div>
+
+<div id = "frame1" style = "display: none">
+---------<br>|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br>|&nbsp;&nbsp;&nbsp;&nbsp;<br>|&nbsp;&nbsp;&nbsp;&nbsp;<br>|&nbsp;&nbsp;&nbsp;<br>|<br>TTTTTTTTTT<br>
+</div>
+
+<div id = "frame2" style = "display: none">
+---------<br>|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br>|&nbsp;&nbsp;&nbsp;&nbsp;O<br>|&nbsp;&nbsp;&nbsp;&nbsp;<br>|&nbsp;&nbsp;&nbsp;<br>|<br>TTTTTTTTTT<br>
+</div>
+
+<div id = "frame3" style = "display: none">
+---------<br>|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br>|&nbsp;&nbsp;&nbsp;&nbsp;O<br>|&nbsp;&nbsp;&nbsp;&nbsp;/<br>|&nbsp;&nbsp;&nbsp;<br>|<br>TTTTTTTTTT<br>
+</div>
+
+<div id = "frame4" style = "display: none">
+---------<br>|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br>|&nbsp;&nbsp;&nbsp;&nbsp;O<br>|&nbsp;&nbsp;&nbsp;&nbsp;/|<br>|&nbsp;&nbsp;&nbsp;<br>|<br>TTTTTTTTTT<br>
+</div>
+
+<div id = "frame5" style = "display: none">
+---------<br>|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br>|&nbsp;&nbsp;&nbsp;&nbsp;O<br>|&nbsp;&nbsp;&nbsp;&nbsp;/|\<br>|&nbsp;&nbsp;&nbsp;<br>|<br>TTTTTTTTTT<br>
+</div>
+
+<div id = "frame6" style = "display: none">
+---------<br>|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br>|&nbsp;&nbsp;&nbsp;&nbsp;O<br>|&nbsp;&nbsp;&nbsp;&nbsp;/|\<br>|&nbsp;&nbsp;_/&nbsp;<br>|<br>TTTTTTTTTT<br>
+</div>
+
+<!--<div id = "newFrame" style = "display: none">-->
+<div id = "frame7" style = "display: none">
+---------<br>|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br>|&nbsp;&nbsp;&nbsp;&nbsp;O<br>|&nbsp;&nbsp;&nbsp;&nbsp;/|\<br>|&nbsp;&nbsp;_/&nbsp;\_<br>|<br>TTTTTTTTTT<br>
+</div>
+<button onclick = "updateFrame()">Update Frame</button>
+<script type = "text/javascript">
+var frames = ["frame0", "frame1", "frame2", "frame3", "frame4", "frame5", "frame6", "frame7"];
+var randomWords = [ "doorstep", "effort", "veteran", "cleat", "retrieval",
+					"boxlike", "oxymoron", "shallot", "rework", "delirium",
+					"unheard", "graceful", "securely", "immunize", "footpad",
+					"outage", "audible", "likeness", "overcast", "portfolio" ]
+					
+var currentFrameIndex = 0
+function updateFrame() {
+	curr = document.getElementById("baseFrame");
+	currentFrameIndex++;
+	if (currentFrameIndex >= frames.length) {
+		currentFrameIndex = 0;
+	}
+	newF = document.getElementById(frames[currentFrameIndex]);
+	curr.innerHTML = newF.innerHTML;
+}
+
+</script>
+
+</body>
+
+</html>
