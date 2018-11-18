@@ -48,7 +48,12 @@
 <div id = "frame7" style = "display: none">
 ---------<br>|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br>|&nbsp;&nbsp;&nbsp;&nbsp;O<br>|&nbsp;&nbsp;&nbsp;&nbsp;/|\<br>|&nbsp;&nbsp;_/&nbsp;\_<br>|<br>TTTTTTTTTT<br>
 </div>
-<button onclick = "updateFrame()">Update Frame</button>
+
+<label id="wordProgress"> ------ </label>
+<br>Input character: <input type="text" name="guessedChar" value="">
+<!<input type="submit" value="Enter">
+
+<button onclick = "updateFrame()">Enter</button>
 <script type = "text/javascript">
 var frames = ["frame0", "frame1", "frame2", "frame3", "frame4", "frame5", "frame6", "frame7"];
 var randomWords = [ "doorstep", "effort", "veteran", "cleat", "retrieval",
@@ -57,6 +62,7 @@ var randomWords = [ "doorstep", "effort", "veteran", "cleat", "retrieval",
 					"outage", "audible", "likeness", "overcast", "portfolio" ]
 					
 var currentFrameIndex = 0
+//var randomIndex = Math.floor(Math.randomIndex()
 function updateFrame() {
 	curr = document.getElementById("baseFrame");
 	currentFrameIndex++;
